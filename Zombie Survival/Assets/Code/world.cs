@@ -13,11 +13,11 @@ public class world : MonoBehaviour
     Transform player = null;
 
     //power
-    private int MAXPOWER = 10;
-    private int power_division = 30;
+    private  int MAXPOWER = 1000;
+    private int power_division = 120;
     private int usable_power = 0;
-    private int totalPowerGen = 0;
-    private int power = 0;
+    private byte totalPowerGen = 0;
+    private byte power = 0;
     bool solarEnable = false;
     bool powerGen = false;
     Text powerT;
@@ -81,12 +81,13 @@ public class world : MonoBehaviour
             if (powerGen == true && power <= MAXPOWER)
             {
                 power += totalPowerGen;
+
                 if (power >= power_division)
                 {
                     power = 0;
                     usable_power += 1;
-                    powerT.text = usable_power.ToString() + "/" + MAXPOWER.ToString() + " Power";
                 }
+                powerT.text = power.ToString() + "(" + usable_power + ")" + "|" + MAXPOWER.ToString() + " Power";
             }
             //prevents generation once maxed
             if (power >= MAXPOWER && powerGen == true)
