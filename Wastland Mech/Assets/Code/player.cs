@@ -10,8 +10,8 @@ class GameSave
 {
     //have to be public to be accessible from outside struct
     public Vector3 playerPOS = new Vector3(0, 0, 0);
-    public List<GameObject> buildings = null;
-    public List<GameObject> zombies = null;
+    public List<GameObject> player_base_buildings = null;
+    public List<GameObject> player_power_buildings = null;
 }
 public class player : MonoBehaviour
 {
@@ -24,33 +24,32 @@ public class player : MonoBehaviour
     private float distance = 0;
     private int rotation_angle = 0;
     private Rigidbody playerR = null;
+    public int meeletime = 15;
+    bool meele = false;
 
     //camera's
     public Camera cam_first;
     public Camera cam_third;
     private bool firstPCam = true;
 
-
     //UI components
     Text waterText = null;
     Text foodText = null;
     Text tempText = null;
-    Text buildingSelect = null;
+    Text building_UI = null;
     int foodValue = 100;
     int waterValue = 100;
     int tempValue = 0;
-    int building = 0;
-    public int meeletime = 15;
-    bool meele = false;
-    bool buildM = false;
-
+    
     //bool aim = false;
     public bool spawnB = false;
     public bool placed = false;
     public bool wireCheck = false;
     public bool move = false;
 
-    //building select
+    //building
+    sbyte building_select = -1;
+    bool buildM = false;
     Transform buildSpot = null;
     Vector3 buildPlace = new Vector3(0,0,0);
     GameObject tempB = null;
@@ -64,8 +63,6 @@ public class player : MonoBehaviour
         //cursor
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
-
-        //---------------------------------------references
 
         //scripts
         scriptE = GameObject.Find("world").GetComponent<world>();
@@ -82,16 +79,16 @@ public class player : MonoBehaviour
         waterText = GameObject.Find("water_UI").GetComponent<Text>();
         foodText = GameObject.Find("food_UI").GetComponent<Text>();
         tempText = GameObject.Find("temp_UI").GetComponent<Text>();
-        buildingSelect = GameObject.Find("build_UI").GetComponent<Text>();
+        building_UI = GameObject.Find("build_UI").GetComponent<Text>();
 
         //settings before game starts (change later when saving is implemented)
         cam_third.gameObject.SetActive(false);
-        buildingSelect.gameObject.SetActive(false);
         playerR.GetComponent<MeshRenderer>().enabled = false;
-        Application.targetFrameRate = 60;
         waterText.text = "Water: " + waterValue.ToString();
         foodText.text = "Food: " + foodValue.ToString();
         tempText.text = tempValue.ToString() + "C";
+        building_UI.text = "Build Mode: Inactive\nPress B to enter build mode";
+        Application.targetFrameRate = 60;
     }
     void Update()
     {
@@ -236,19 +233,19 @@ public class player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.B) && buildM == false)
         {
             buildM = true;
-            buildingSelect.gameObject.SetActive(true);
+            building_UI.text = "Build Mode: Active\nTo select a building press one of the number on the top of your keyboard\n1. Solar Panel\n2. Generator\n3. Base\n4. Wall";
         }
         //disables build mode
         else if (Input.GetKeyDown(KeyCode.B) && buildM == true)
         {
             buildM = false;
             spawnB = false;
-            building = 0;
+
             if (tempB != null)
             {
                 Destroy(tempB.gameObject);
             }
-            buildingSelect.gameObject.SetActive(false);
+            building_UI.text = "Build Mode: Inactive\nPress B to enter build mode";
         }
         if (Input.GetKeyDown(KeyCode.P))
         {
@@ -262,7 +259,16 @@ public class player : MonoBehaviour
         //speed up
         if (Input.GetKeyDown(KeyCode.KeypadPlus))
         {
-            Time.timeScale = 2;
+            if (Time.timeScale == 10)
+            {
+                Time.timeScale = 10;
+                Debug.Log("Speed normal");
+            }
+            else {
+                Time.timeScale = 10;
+                Debug.Log("Speed up");
+            }
+            
         }
     }
     void FixedUpdate()
@@ -299,96 +305,88 @@ public class player : MonoBehaviour
     //building
     void Build()
     {
-        //select Base
+        //select  solar_panel
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            building = 1;
+            building_select = 0;
             if (spawnB == true)
             {
                 Destroy(tempB.gameObject);
                 spawnB = false;
             }
+
         }
-        //select Wall
+        //select generator
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            building = 2;
+            building_select = 1;
             if (spawnB == true)
             {
                 Destroy(tempB.gameObject);
                 spawnB = false;
             }
         }
-        //select Solar Panel
+        //select pylon_short
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            building = 3;
+            building_select = 2;
             if (spawnB == true)
             {
                 Destroy(tempB.gameObject);
                 spawnB = false;
             }
         }
-        //select Generator
+        //select generator
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            building = 4;
+            building_select = 3;
             if (spawnB == true)
             {
                 Destroy(tempB.gameObject);
                 spawnB = false;
             }
         }
-        //select Wire
+        //select base
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            building = 5;
+            building_select = 4;
             if (spawnB == true)
             {
                 Destroy(tempB.gameObject);
                 spawnB = false;
             }
         }
-        //building select
-        if (spawnB == false && building != 0)
+        //select wall
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-
-            switch (building)
+            building_select = 5;
+            if (spawnB == true)
             {
-                //base
-                case 1:
-                    tempB = Instantiate(scriptE.base_buildings[0], buildPlace, Quaternion.Euler(0, 0, 0));
-                    spawnB = true;
-                    break;
-                //wall
-                case 2:
-                    tempB = Instantiate(scriptE.base_buildings[1], buildPlace, Quaternion.Euler(0, 0, 0));
-                    spawnB = true;
-                    break;
-                //solar panel
-                case 3:
-                    tempB = Instantiate(scriptE.base_buildings[2], buildPlace, Quaternion.Euler(0, 0, 0));
-                    spawnB = true;
-                    break;
-                //generator
-                case 4:
-                    tempB = Instantiate(scriptE.base_buildings[3], buildPlace, Quaternion.Euler(0, 0, 0));
-                    spawnB = true;
-                    break;
-                //wire
-                case 5:
-                    tempB = Instantiate(scriptE.base_buildings[4], buildPlace, Quaternion.Euler(0, 0, 0));
-                    spawnB = true;
-                    break;
+                Destroy(tempB.gameObject);
+                spawnB = false;
             }
         }
+        
+        //building select
+        if (spawnB == false && building_select != -1)
+        {
+            tempB = Instantiate(scriptE.prefab_builds[building_select], buildPlace, Quaternion.Euler(0, 0, 0));
+            spawnB = true;
+        }
+        //once building is spawned
         if (spawnB == true)
         {
             //moves building
             buildPlace = new Vector3(buildSpot.position.x, buildSpot.position.y - distance, buildSpot.position.z);
             tempB.transform.position = buildPlace;
 
-            //building snap points
+            //update distance from buildings to this pylon
+            if(building_select == 2 && move == true)
+            {
+
+            }
+
+            //snap points WIP
             Ray ray = new Ray(cam_first.transform.position, cam_first.transform.forward);
             RaycastHit hit;
             Physics.Raycast(ray, out hit, 20);
@@ -405,9 +403,7 @@ public class player : MonoBehaviour
                 tempB.gameObject.tag = "pre_building";
                 tempB = null;
                 spawnB = false;
-                
-                //chagne to a byte (indicates type of building that was spawned)
-                scriptE.new_power_building = 1;
+                scriptE.new_building = building_select;
             }
             //rotate left
             if (Input.GetKey(KeyCode.Q) && spawnB == true)
@@ -417,11 +413,11 @@ public class player : MonoBehaviour
             //rotate right
             else if (Input.GetKey(KeyCode.E) && spawnB == true)
             {
-                tempB.transform.Rotate(0, rotation_angle -= 90, 0);
+                tempB.transform.RotateAround(Vector3.zero, Vector3.back, 1);
             }
         }
     }
-    //saves game (needs to actually save position, buildings and zombies)
+    //saves game (needs to actually save buildings, objects, etc.)
     static void SaveGame()
     {
        GameSave save = new GameSave();
@@ -470,8 +466,4 @@ public class player : MonoBehaviour
 
         playerObject.transform.position = save.playerPOS;
     }
-    
-    
 }
-
-

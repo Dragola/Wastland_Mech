@@ -61,25 +61,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Code\building_placement.cs" />
-    <Compile Include="Assets\Code\car.cs" />
-    <Compile Include="Assets\Code\hitbox.cs" />
+    <Compile Include="Assets\Code\energy_storage.cs" />
     <Compile Include="Assets\Code\player.cs" />
+    <Compile Include="Assets\Code\pylon.cs" />
+    <Compile Include="Assets\Code\solar_panel.cs" />
     <Compile Include="Assets\Code\world.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.PackageManagerUI.Editor">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AIModule">
       <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
@@ -283,13 +283,13 @@
       <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Editor">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.StandardEvents">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.StandardEvents.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Analytics.Tracker">
-      <HintPath>A:/GitHub/Zombie-Survival/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
+      <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/PackageCache/com.unity.analytics@3.2.2/Unity.Analytics.Tracker.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>C:/Program Files/Unity/Editor/Data/MonoBleedingEdge/lib/mono/unity/mscorlib.dll</HintPath>

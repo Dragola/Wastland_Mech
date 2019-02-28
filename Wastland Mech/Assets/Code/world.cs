@@ -7,30 +7,34 @@ public class world : MonoBehaviour
 {
     //world
     GameObject sun = null;
-    int DayDuration = 3600;
+    public ushort DayDuration = 3600;
 
     //player
     Transform player = null;
 
     //power
-    private  int MAXPOWER = 1000; // max power (can be changed via upgrades/storage)
-    private int power_division = 100; //divides into usable power
-    private int usable_power = 0; //actual power
-    byte power = 0;
-    bool solarEnable = false;
-    public byte new_power_building = 0;
-    byte solar_count = 0;
-    byte generator_count = 0;
+    private byte power = 0; //get from solar panels
+    private byte power_building_index = 0;
+    private byte power_pylon_index = 0;
     Text powerT;
+    private byte num_solar_panels = 0;
+    private byte num_generators = 0;
 
-    //lists
-    public List<GameObject> base_buildings = new List<GameObject>();
-    public List<GameObject> solar_buildings = new List<GameObject>();
-    public List<GameObject> generator_buildings = new List<GameObject>();
+    //building
+    public sbyte new_building = -1;
+    private byte base_count = 0;
+
+    //lists of objects
+    public List<GameObject> prefab_builds = new List<GameObject>();
+    public List<GameObject> base_builds = new List<GameObject>();
+    public List<GameObject> pwr_builds = new List<GameObject>();
+    public List<GameObject> pwr_pylons = new List<GameObject>();
+
 
     // Use this for initialization
     void Start()
     {
+        //sun
         sun = GameObject.Find("sun");
 
         //player
@@ -40,59 +44,88 @@ public class world : MonoBehaviour
         powerT = GameObject.Find("power_UI").GetComponent<Text>();
 
         //buildings
-        base_buildings.Add(Resources.Load("Prefabs/Base/base") as GameObject);
-        base_buildings.Add(Resources.Load("Prefabs/Base/wall") as GameObject);
-        base_buildings.Add(Resources.Load("Prefabs/Energy/solar_panel") as GameObject);
-        base_buildings.Add(Resources.Load("Prefabs/Energy/generator") as GameObject);
-        base_buildings.Add(Resources.Load("Prefabs/Energy/cable") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Energy/solar_panel") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Energy/generator") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Energy/pylon_short") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Energy/energy_storage") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Base/base") as GameObject);
+        prefab_builds.Add(Resources.Load("Prefabs/Base/wall") as GameObject);
+
     }
 
     // Update is called once per frame (60fps = 60calls)
     void Update()
     {
         //sun rotation
-        sun.transform.position = new Vector3(player.transform.position.x, player.transform.position.y + 60, player.transform.position.z);
+        sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
 
-        //if new power building was placed (triggered in player)
-        if (new_power_building > 0)
+        //if new building was placed (triggered in player)
+        if (new_building >= 0)
         {
-            //solar panel
-            if (new_power_building == 1)
+            //solar_panel
+            if (new_building == 0)
             {
-                Debug.Log("looking for solar panel");
-                solar_buildings.Add(GameObject.FindGameObjectWithTag("pre_building"));
-                solar_buildings[solar_count].gameObject.name = ("Solar Panel" + solar_count);
-                solar_buildings[solar_count].gameObject.tag = "Untagged";
-                solar_count += 1;
+                pwr_builds.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                pwr_builds[power_building_index].gameObject.name = ("Solar_Panel");
+                pwr_builds[power_building_index].gameObject.tag = "power_source";
+                num_solar_panels += 1;
+                power_building_index += 1;
             }
-            new_power_building = 0;
-            
+            //generator
+            else if (new_building == 1)
+            {
+                pwr_builds.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                pwr_builds[power_building_index].gameObject.name = ("Generator");
+                pwr_builds[power_building_index].gameObject.tag = "power_source";
+                num_generators += 1;
+                power_building_index += 1;
+            }
+
+            //pylon_short
+            else if (new_building == 2)
+            {
+                pwr_pylons.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                pwr_pylons[power_building_index].gameObject.name = ("Pylon_Short");
+                pwr_pylons[power_building_index].gameObject.tag = "Untagged";
+                power_pylon_index += 1;
+            }
+            //energy_stroage
+            else if (new_building == 3)
+            {
+                pwr_builds.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                pwr_builds[power_building_index].gameObject.name = ("Energy_Stroage");
+                pwr_builds[power_building_index].gameObject.tag = "Untagged";
+                power_building_index += 1;
+            }
+
+            //base
+            else if (new_building == 4)
+            {
+                base_builds.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                base_builds[base_count].gameObject.name = "base";
+                base_builds[base_count].gameObject.tag = "Untagged";
+                base_count += 1;
+            }
+            //wall
+            else if (new_building == 5)
+            {
+                base_builds.Add(GameObject.FindGameObjectWithTag("pre_building"));
+                base_builds[base_count].gameObject.name = "wall";
+                base_builds[base_count].gameObject.tag = "Untagged";
+                base_count += 1;
+            }
+
+            new_building = -1;
         }
 
         //if at least one power generator placed
-        if (solar_count > 0 || generator_count > 0)
+        if (pwr_builds.Count > 0)
         {
-
-            //if not at power max capacity
-            if (power <= MAXPOWER)
-            {
-                //generates power
-                power += solar_count;
-                power += generator_count;
-
-                //converts to usable energy
-                if (power >= power_division)
-                {
-                    power -= 100;
-                    usable_power += 1;
-
-                    //updates UI
-                    powerT.text = power.ToString() + "(" + usable_power + ")" + "|" + MAXPOWER.ToString() + " Power";
-                }
-                
-            }
+            //updates UI
+            powerT.text = "" + power + "|" +  "1000 Power";
         }
     }
+    //runs at fixed rate
     void FixedUpdate()
     {
         DayDuration -= 1;
