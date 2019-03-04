@@ -21,36 +21,7 @@ public class pylon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //power + storage
-        if (num_solar_panels > 0 && pwr_stor_conn == true)
-        {
-            Debug.Log("Power + Storage");
-
-            for (sbyte i = 0; i < pwr_conns.Count; i++)
-                {
-                Debug.Log("Loop");
-                //find energy storage(that need charging in order)
-                if (pwr_storage_first == -1)
-                {
-                    if (pwr_conns[i].name == "Energy_Storage")
-                    {
-                        //fins first storage that needs power
-                        if (pwr_conns[i].GetComponent<energy_storage>().stor_full == false)
-                        {
-                            Debug.Log("Found Non full storage at: " + i);
-                            pwr_storage_first = i;
-                        }
-                    }
-                }
-                //gets power from solar panel (if there is storage)
-                if (pwr_conns[i].name == "Solar Panel" && pwr_storage_first != -1)
-                {
-                    Debug.Log("Power Transfer");
-                    pwr_conns[pwr_storage_first].GetComponent<energy_storage>().stor_power += 1;
-                    pwr_conns[i].GetComponent<solar_panel>().power -= 1;
-                }
-            }
-        }
+     
     }
 
     private void OnTriggerEnter(Collider other)

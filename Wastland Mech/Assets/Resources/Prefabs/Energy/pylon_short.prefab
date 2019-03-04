@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6769488208900397550}
   - component: {fileID: 6769488208900397551}
-  - component: {fileID: 1949174094797332531}
   - component: {fileID: 6769488208900397548}
   - component: {fileID: 6532457953408960260}
   - component: {fileID: 3335581663586869719}
@@ -43,23 +42,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6769488208900397554}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &1949174094797332531
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6769488208900397554}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87818932972e3324098f37ca5cd92ea2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pwr_conns: []
-  pylon_conns: []
-  pwr_stor_conn: 0
-  pwr_storage_first: -1
-  num_solar_panels: 0
 --- !u!23 &6769488208900397548
 MeshRenderer:
   m_ObjectHideFlags: 0

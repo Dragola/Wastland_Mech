@@ -9,6 +9,7 @@ TagManager:
   - pre_building
   - Snap Point
   - power_source
+  - grounded
   layers:
   - Default
   - TransparentFX

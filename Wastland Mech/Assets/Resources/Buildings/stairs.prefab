@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 33339954543747346}
   - component: {fileID: 65869849222716248}
   - component: {fileID: 23497540954154688}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Step
-  m_TagString: Untagged
+  m_TagString: grounded
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -100,7 +100,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4909191841559242}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: stairs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,9 +137,9 @@ GameObject:
   - component: {fileID: 33178743037741656}
   - component: {fileID: 65919834711659662}
   - component: {fileID: 23086500912696886}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: 'Step '
-  m_TagString: Untagged
+  m_TagString: grounded
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -228,9 +228,9 @@ GameObject:
   - component: {fileID: 33916237350664802}
   - component: {fileID: 65921233487349422}
   - component: {fileID: 23665403264521354}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: 'Step '
-  m_TagString: Untagged
+  m_TagString: grounded
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -319,9 +319,9 @@ GameObject:
   - component: {fileID: 33979286830148542}
   - component: {fileID: 65187235290005246}
   - component: {fileID: 23539777839369290}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: 'Step '
-  m_TagString: Untagged
+  m_TagString: grounded
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295

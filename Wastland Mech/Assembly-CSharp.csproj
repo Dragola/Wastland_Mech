@@ -61,11 +61,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Code\energy_storage.cs" />
-    <Compile Include="Assets\Code\player.cs" />
-    <Compile Include="Assets\Code\pylon.cs" />
-    <Compile Include="Assets\Code\solar_panel.cs" />
-    <Compile Include="Assets\Code\world.cs" />
+    <Compile Include="Assets\Code\Player.cs" />
+    <Compile Include="Assets\Code\Pylon.cs" />
+    <Compile Include="Assets\Code\World.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>A:/GitHub/Wastland Mech/Wastland Mech/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

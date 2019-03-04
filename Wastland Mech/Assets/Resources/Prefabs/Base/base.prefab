@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 23566277759529940}
   m_Layer: 2
   m_Name: Base WallR
-  m_TagString: IgnoreRay
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
@@ -321,7 +321,7 @@ GameObject:
   - component: {fileID: 23683297506060362}
   m_Layer: 2
   m_Name: Base Roof
-  m_TagString: IgnoreRay
+  m_TagString: grounded
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295

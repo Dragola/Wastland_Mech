@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class world : MonoBehaviour
+public class World : MonoBehaviour
 {
     //world
     GameObject sun = null;
