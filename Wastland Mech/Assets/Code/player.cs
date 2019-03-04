@@ -73,7 +73,7 @@ public class Player : MonoBehaviour
         //UI updates
         UI(player_change);
         //build mode
-        //Build(player_change);
+        Build(player_change);
     }
     void FixedUpdate()
     {
