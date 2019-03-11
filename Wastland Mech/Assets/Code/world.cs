@@ -2,7 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
-
+/*
+ * Add spawning method (keep track and spawn objects/loot)
+ * Add resources
+ * 
+ */
 public class World : MonoBehaviour
 {
     //world
@@ -13,7 +17,7 @@ public class World : MonoBehaviour
     Transform player = null;
 
     //power
-    private byte power = 0; //get from solar panels
+    private byte power = 0; //gnerate based on number of power sources
     private byte power_building_index = 0;
     private byte power_pylon_index = 0;
     Text powerT;

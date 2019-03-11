@@ -5,7 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
+/*
+ * Finish adding player related actions (climbing and interaction)
+ * Add inventory- later
+ * 
+ */
 class GameSave
 {
     //have to be public to be accessible from outside struct
@@ -30,8 +34,8 @@ public class Player : MonoBehaviour
     public float player_to_ground = 0;
 
     //camera's
-    public Camera cam_first;
-    public Camera cam_third;
+    private Camera cam_first;
+    private Camera cam_third;
     private bool firstPCam = true;
 
     //UI components
