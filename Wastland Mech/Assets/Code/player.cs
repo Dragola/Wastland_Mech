@@ -4,19 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-/*
- * Finish adding player related actions (climbing and interaction)
- * Add inventory- later
- * 
- */
-class GameSave
-{
-    //have to be public to be accessible from outside struct
-    public Vector3 playerPOS = new Vector3(0, 0, 0);
-    public List<GameObject> player_base_buildings = null;
-    public List<GameObject> player_power_buildings = null;
-}
+
 public class Player : MonoBehaviour
 {
     //scripts
@@ -42,7 +30,6 @@ public class Player : MonoBehaviour
     Text waterText = null;
     Text foodText = null;
     Text tempText = null;
-    Text building_UI = null;
     int foodValue = 100;
     int waterValue = 100;
     int tempValue = 0;
@@ -53,15 +40,9 @@ public class Player : MonoBehaviour
     public bool wireCheck = false;
     public bool move = false;
 
-    //building
-    sbyte building_select = -1;
-    bool buildM = false;
-    Transform buildSpot = null;
-    Vector3 buildPlace = new Vector3(0, 0, 0);
-    GameObject tempB = null;
-
     //changes
-    private byte player_change = 0; //0 = nothing, 1 = buildmode
+    private bool UI_change = false;
+    private bool player_change = false;
 
     // Use this for initialization
     void Start()
@@ -73,11 +54,9 @@ public class Player : MonoBehaviour
     void Update()
     {
         //player movement
-        Movement(1);
+        Movement(true);
         //UI updates
-        UI(player_change);
-        //build mode
-        Build(player_change);
+        UI(false);
     }
     void FixedUpdate()
     {
@@ -87,36 +66,15 @@ public class Player : MonoBehaviour
         {
             meeletime -= 1;
         }
-        if (move == true)
-        {
-            //checks distance from ground/object below
-            if (player_change == 1)
-            {
-                Ray ray = new Ray(buildSpot.position, -buildSpot.up);
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
-                {
-                    distance = hit.distance;
-                }
-            }
-        }
     }
-    private byte UI(byte enabled)
+    private bool UI(bool changed)
     {
-        //update build mode UI
-        if (enabled == 1)
-        {
-            building_UI.text = "Build Mode: Active\nTo select a building press one of the number on the top of your keyboard\n1. Solar Panel\n2. Generator\n3. Base\n4. Wall";
-        }
-        else
-        {
-            building_UI.text = "Build Mode: Inactive\nPress B to enter build mode";
-        }
-        return 0;
+
+        return true;
     }
-    public byte Movement(byte enabled)
+    public bool Movement(bool changed)
     {
-        if (enabled == 1)
+        if (changed)
         {
             //resets move detected
             move = false;
@@ -147,7 +105,7 @@ public class Player : MonoBehaviour
                 }
             }
             //melee detection
-            if (Input.GetMouseButtonDown(0) & buildM == false)
+            if (Input.GetMouseButtonDown(0))
             {
 
                 Ray ray = new Ray(this.transform.position, transform.forward);
@@ -268,20 +226,6 @@ public class Player : MonoBehaviour
                 cam_third.gameObject.SetActive(true);
                 firstPCam = false;
             }
-            //build mode
-            else if (Input.GetKeyDown(KeyCode.B))
-            {
-                //enabled buld mode
-                if (player_change == 0)
-                {
-                    player_change = 1;
-                }
-                //disable build mode
-                else
-                {
-                    player_change = 0;
-                }
-            }
             //speed up
             if (Input.GetKeyDown(KeyCode.KeypadPlus))
             {
@@ -300,185 +244,43 @@ public class Player : MonoBehaviour
             //quits game
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                SaveGame();
                 Application.Quit();
             }
             
         }
-        return 0;
+        return false;
     }
-    public byte Build(byte enabled)
+    private void SaveGame()
     {
-        //build mode active
-        if (enabled == 1)
-        {
-            //select  solar_panel
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                building_select = 0;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
+        //file located
+        string destination = "Assets/Resources/save.txt";
+        FileStream file = null;
 
-            }
-            //select generator
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                building_select = 1;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
-            }
-            //select pylon_short
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                building_select = 2;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
-            }
-            //select generator
-            else if (Input.GetKeyDown(KeyCode.Alpha4))
-            {
-                building_select = 3;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
-            }
-            //select base
-            else if (Input.GetKeyDown(KeyCode.Alpha5))
-            {
-                building_select = 4;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
-            }
-            //select wall
-            else if (Input.GetKeyDown(KeyCode.Alpha6))
-            {
-                building_select = 5;
-                if (spawnB == true)
-                {
-                    Destroy(tempB.gameObject);
-                    spawnB = false;
-                }
-            }
-
-            //building select
-            if (spawnB == false && building_select != -1)
-            {
-                tempB = Instantiate(scriptE.prefab_builds[building_select], buildPlace, Quaternion.Euler(0, 0, 0));
-                spawnB = true;
-            }
-            //once building is spawned
-            if (spawnB == true)
-            {
-                //moves building
-                buildPlace = new Vector3(buildSpot.position.x, buildSpot.position.y - distance, buildSpot.position.z);
-                tempB.transform.position = buildPlace;
-
-                //snap points WIP
-                Ray ray = new Ray(cam_first.transform.position, cam_first.transform.forward);
-                RaycastHit hit;
-                Physics.Raycast(ray, out hit, 20);
-                {
-                    if (hit.collider != null && hit.collider.tag == "Snap Point")
-                    {
-                        print("Snap");
-                    }
-                }
-
-                //places building	
-                if (Input.GetMouseButtonDown(0) && spawnB == true)
-                {
-                    tempB.gameObject.tag = "pre_building";
-                    tempB = null;
-                    spawnB = false;
-                    scriptE.new_building = building_select;
-                }
-                //rotate left
-                if (Input.GetKey(KeyCode.Q) && spawnB == true)
-                {
-                    tempB.transform.RotateAround(Vector3.zero, Vector3.up, 1);
-                }
-                //rotate right
-                else if (Input.GetKey(KeyCode.E) && spawnB == true)
-                {
-                    tempB.transform.RotateAround(Vector3.zero, Vector3.down, 1);
-                }
-            }
-        }
-        //despawns and resets build mode
-        else
-        {
-            //deletes building
-            if (tempB != null)
-            {
-                Destroy(tempB);
-                tempB = null;
-            }
-            spawnB = false;
-        }
-        return 0;
-    }
-    //saves game (needs to actually save buildings, objects, etc.)
-    static void SaveGame()
-    {
-        GameSave save = new GameSave();
-        save.playerPOS.x = 1000;
-        save.playerPOS.y = 1000;
-        save.playerPOS.z = 0;
-
-        string destination = "Assets/Resources/save.dat"; //where file is located
-        FileStream file;
-
-        //if file exists, write to
-        if (File.Exists(destination))
+        //if file exists then load
+        if (File.Exists(destination)) {
             file = File.OpenWrite(destination);
-
-        //if file doesn't exist, create file
+        }
         else
+        {
             file = File.Create(destination);
+        }
+        //writes to file
+        StreamWriter write = new StreamWriter(file);
 
-        //converts to binary format and puts into file
-        BinaryFormatter bf = new BinaryFormatter();
-        bf.Serialize(file, save);
+        //player position
+        write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
+
+        //pushes the output to the file
+        write.Flush();
+
         file.Close();
     }
 
     //loads file
     private void LoadGame()
     {
-        /*GameSave save = new GameSave();
 
-        string destination = "Assets/Resources/save.dat";
-        FileStream file;
-
-        if (File.Exists(destination))
-            file = File.OpenRead(destination);
-        else
-        {
-            Debug.LogError("File not found");
-            return;
-        }
-
-        BinaryFormatter bf = new BinaryFormatter();
-        save = (GameSave)bf.Deserialize(file);
-        file.Close();
-
-        GameObject playerObject = GameObject.Find("Player");
-
-        playerObject.transform.position = save.playerPOS;
-    */
         //cursor
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
@@ -488,17 +290,37 @@ public class Player : MonoBehaviour
 
         //player
         playerR = GetComponent<Rigidbody>();
-        buildSpot = GameObject.Find("build_spot").GetComponent<Transform>();
 
         //camera's
         cam_first = GameObject.Find("camera_FP").GetComponent<Camera>();
         cam_third = GameObject.Find("camera_TP").GetComponent<Camera>();
 
         //UI
-        waterText = GameObject.Find("water_UI").GetComponent<Text>();
-        foodText = GameObject.Find("food_UI").GetComponent<Text>();
-        tempText = GameObject.Find("temp_UI").GetComponent<Text>();
-        building_UI = GameObject.Find("build_UI").GetComponent<Text>();
+        waterText = GameObject.Find("Water_UI").GetComponent<Text>();
+        foodText = GameObject.Find("Food_UI").GetComponent<Text>();
+        tempText = GameObject.Find("Temp_UI").GetComponent<Text>();
+
+        //Loads previous save (if it exists
+        string destination = "Assets/Resources/save.txt";
+        FileStream file = null;
+
+        //if file exists then load
+        if (File.Exists(destination))
+        {
+            //get file
+            file = File.OpenRead(destination);
+            StreamReader read = new StreamReader(file);
+
+            //gets line from file
+            string line = read.ReadLine();
+
+            //player position
+            string[] playerData = line.Split(',');
+            Vector3 playerPOS = new Vector3(float.Parse(playerData[0]), float.Parse(playerData[1]), float.Parse(playerData[2]));
+            gameObject.transform.SetPositionAndRotation(playerPOS, Quaternion.Euler(0,0,0));
+
+            file.Close();
+        }
 
         //settings before game starts (change later when saving is implemented)
         cam_third.gameObject.SetActive(false);
@@ -506,11 +328,11 @@ public class Player : MonoBehaviour
         waterText.text = "Water: " + waterValue.ToString();
         foodText.text = "Food: " + foodValue.ToString();
         tempText.text = tempValue.ToString() + "C";
-        building_UI.text = "Build Mode: Inactive\nPress B to enter build mode";
         Application.targetFrameRate = 60;
     }
     public void OnCollisionEnter(Collision collision)
-    { 
+    {
+        //jumping
         if(collision.gameObject.tag == "grounded")
         {
             //detects collision from the bottom of player

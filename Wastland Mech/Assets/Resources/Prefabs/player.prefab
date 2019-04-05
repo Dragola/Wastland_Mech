@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 124294803355633990}
   - component: {fileID: 81988159390410330}
   m_Layer: 0
-  m_Name: camera_FP
+  m_Name: Camera_FP
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -91,36 +91,6 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066569971592138}
   m_Enabled: 1
---- !u!1 &1379002256606346
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4729097640750572}
-  m_Layer: 0
-  m_Name: build_spot
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4729097640750572
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1379002256606346}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 7, z: 5}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 4545825779936984}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1396268209906870
 GameObject:
   m_ObjectHideFlags: 0
@@ -136,7 +106,7 @@ GameObject:
   - component: {fileID: 23093218287586120}
   - component: {fileID: 54630106461085328}
   m_Layer: 0
-  m_Name: player
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -156,7 +126,6 @@ Transform:
   - {fileID: 4964547449943140}
   - {fileID: 4836597725684976}
   - {fileID: 4892648701211642}
-  - {fileID: 4729097640750572}
   - {fileID: 4755245319335700}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -185,8 +154,6 @@ MonoBehaviour:
   movey: 0
   meeletime: 15
   player_to_ground: 0
-  cam_first: {fileID: 0}
-  cam_third: {fileID: 0}
   spawnB: 0
   placed: 0
   wireCheck: 0
@@ -4969,7 +4936,7 @@ GameObject:
   - component: {fileID: 124730402439140964}
   - component: {fileID: 65269931560120486}
   m_Layer: 0
-  m_Name: camera_TP
+  m_Name: Camera_TP
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5062,7 +5029,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4755245319335700}
   m_Layer: 0
-  m_Name: hand
+  m_Name: Player_Hand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5081,7 +5048,7 @@ Transform:
   m_Children:
   - {fileID: 4489265822180492}
   m_Father: {fileID: 4545825779936984}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &6220927587845406964
 PrefabInstance:
