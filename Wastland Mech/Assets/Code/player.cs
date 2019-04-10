@@ -226,7 +226,7 @@ public class Player : MonoBehaviour
             {
                 if (Time.timeScale == 10)
                 {
-                    Time.timeScale = 10;
+                    Time.timeScale = 1;
                     Debug.Log("Speed normal");
                 }
                 else
@@ -248,11 +248,11 @@ public class Player : MonoBehaviour
     }
     private void SaveGame()
     {
-        //file located
+        //path to the File
         string destination = "Assets/Resources/save.txt";
         FileStream file = null;
 
-        //if file exists then load
+        //Cehcks if File exists, it it does then grab, othwerwise create new File 
         if (File.Exists(destination)) {
             file = File.OpenWrite(destination);
         }
@@ -260,15 +260,16 @@ public class Player : MonoBehaviour
         {
             file = File.Create(destination);
         }
-        //writes to file
+        //File writer
         StreamWriter write = new StreamWriter(file);
 
-        //player position
+        //adds the player position to be written (Queue's it)
         write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
 
-        //pushes the output to the file
+        //pushes the output to the File
         write.Flush();
 
+        //closes File
         file.Close();
     }
 
