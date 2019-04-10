@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
@@ -20,6 +18,7 @@ public class Player : MonoBehaviour
     bool meele = false;
     private bool jumped = false;
     private GameObject ray_position = null;
+    public bool move = false;
 
 
     //camera's
@@ -28,22 +27,25 @@ public class Player : MonoBehaviour
     private bool firstPCam = true;
 
     //UI components
+    GameObject mainUI = null;
     Text waterText = null;
     Text foodText = null;
     Text tempText = null;
     int foodValue = 100;
     int waterValue = 100;
     int tempValue = 0;
+    GameObject inventoryUI = null;
 
     //bool aim = false;
-    public bool spawnB = false;
-    public bool placed = false;
-    public bool wireCheck = false;
-    public bool move = false;
 
-    //changes
-    private bool UI_change = false;
-    private bool player_change = false;
+    //enable and updating
+    private bool update_UI = false; //if UI needs to update
+    private bool enable_movement = true; //enables the player to move and interact
+    private bool enable_inventory = false;
+
+    //inventory
+    public GameObject reachable_object = null;
+    public string[] inventory_objects = new  string[5];
 
     // Use this for initialization
     void Start()
@@ -55,19 +57,38 @@ public class Player : MonoBehaviour
     void Update()
     {
         //player movement
-        Movement(true);
+        Movement(enable_movement);
+
         //UI updates (maybe run in a different script?)- don't need to technically
-        UI(false);
+        UI(update_UI);
+
+        //Inventory
+        Inventory(enable_inventory);
+
     }
     void FixedUpdate()
     {
-
+        //interaction
         RaycastHit hit;
         if(Physics.Raycast(ray_position.transform.position, ray_position.transform.forward, out hit, 1))
         {
-            Debug.Log(hit.collider.name);
-            Debug.DrawRay(ray_position.transform.position, ray_position.transform.forward * hit.distance, Color.red);
+            //if you interact with an object
+            if(reachable_object == null)
+            {
+                reachable_object = hit.collider.gameObject;
+            }
+            //if you interact with a new object
+            else if(reachable_object != hit.collider.gameObject)
+            {
+                reachable_object = hit.collider.gameObject;
+            }
         }
+        //if not interacting with anything then set reachable_object to null
+        else
+        {
+            reachable_object = null;
+        }
+
         //meele
         //melee timer
         if (meele == true)
@@ -80,9 +101,12 @@ public class Player : MonoBehaviour
 
         return true;
     }
-    public bool Movement(bool changed)
+
+    //player movement and interaction
+    public bool Movement(bool status)
     {
-        if (changed)
+        //if movement is enabled 
+        if (status)
         {
             //resets move detected
             move = false;
@@ -236,6 +260,14 @@ public class Player : MonoBehaviour
                 }
 
             }
+            //open inventory
+            if (Input.GetKey(KeyCode.I))
+            {
+                mainUI.SetActive(false);
+                inventoryUI.SetActive(true);
+                enable_inventory = true;
+                enable_movement = false;
+            }
             //quits game
             if (Input.GetKeyDown(KeyCode.Escape))
             {
@@ -246,6 +278,8 @@ public class Player : MonoBehaviour
         }
         return false;
     }
+
+    //Saves the game
     private void SaveGame()
     {
         //path to the File
@@ -273,7 +307,7 @@ public class Player : MonoBehaviour
         file.Close();
     }
 
-    //loads file
+    //Loads objects and save file (if present)
     private void LoadGame()
     {
 
@@ -293,9 +327,12 @@ public class Player : MonoBehaviour
         cam_third = GameObject.Find("Camera_TP").GetComponent<Camera>();
 
         //UI
+        mainUI = GameObject.Find("MainUI");
+        inventoryUI = GameObject.Find("InventoryUI");
         waterText = GameObject.Find("Water_UI").GetComponent<Text>();
         foodText = GameObject.Find("Food_UI").GetComponent<Text>();
         tempText = GameObject.Find("Temp_UI").GetComponent<Text>();
+        inventoryUI.SetActive(false);
 
         //Loads previous save (if it exists
         string destination = "Assets/Resources/save.txt";
@@ -327,7 +364,26 @@ public class Player : MonoBehaviour
         tempText.text = tempValue.ToString() + "C";
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
     }
-    public void OnCollisionEnter(Collision collision)
+
+    //the invenetory method (interacting, opening and closing)
+    private void Inventory(bool status)
+    {
+        //if inventory is enabled
+        if (status)
+        {
+            //closes inventory and re-enables movement
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("Closed Inventory");
+                inventoryUI.SetActive(false);
+                mainUI.SetActive(true);
+                enable_movement = true;
+                enable_inventory = false;
+            }
+        }
+
+    }
+    private void OnCollisionEnter(Collision collision)
     {
         //detects collision from the bottom of player
         var normal = collision.GetContact(0).normal;
@@ -340,4 +396,5 @@ public class Player : MonoBehaviour
             }
         }
     }
+    
 }

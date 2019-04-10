@@ -6,10 +6,8 @@ TagManager:
   tags:
   - building
   - IgnoreRay
-  - pre_building
   - Snap Point
-  - power_source
-  - grounded
+  - resource
   layers:
   - Default
   - TransparentFX
