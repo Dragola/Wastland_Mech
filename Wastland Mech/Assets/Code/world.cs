@@ -11,7 +11,7 @@ public class World : MonoBehaviour
 {
     //world
     GameObject sun = null;
-    public ushort DayDuration = 3600;
+    public ushort dayDuration = 3600;
 
     //player
     Transform player = null;
@@ -27,13 +27,13 @@ public class World : MonoBehaviour
     void Start()
     {
         //sun
-        sun = GameObject.Find("sun");
+        sun = GameObject.Find("Sun");
 
         //player
-        player = GameObject.Find("player").GetComponent<Transform>();
+        player = GameObject.Find("Player").GetComponent<Transform>();
 
         //UI
-        powerT = GameObject.Find("power_UI").GetComponent<Text>();
+        powerT = GameObject.Find("Power_UI").GetComponent<Text>();
 
         //buildings
         power_prefabs.Add(Resources.Load("Prefabs/Power/solar_panel") as GameObject);
@@ -48,11 +48,17 @@ public class World : MonoBehaviour
         //sun rotation
         sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
 
+        //reset clock
+        if(dayDuration <= 0)
+        {
+            dayDuration = 3600;
+        }
+
     }
     //runs at fixed rate
     void FixedUpdate()
     {
-        DayDuration -= 1;
+        dayDuration -= 1;
     }
 }
 

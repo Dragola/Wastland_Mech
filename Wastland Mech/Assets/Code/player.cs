@@ -19,7 +19,8 @@ public class Player : MonoBehaviour
     public int meeletime = 15;
     bool meele = false;
     private bool jumped = false;
-    public float player_to_ground = 0;
+    private GameObject ray_position = null;
+
 
     //camera's
     private Camera cam_first;
@@ -55,11 +56,18 @@ public class Player : MonoBehaviour
     {
         //player movement
         Movement(true);
-        //UI updates
+        //UI updates (maybe run in a different script?)- don't need to technically
         UI(false);
     }
     void FixedUpdate()
     {
+
+        RaycastHit hit;
+        if(Physics.Raycast(ray_position.transform.position, ray_position.transform.forward, out hit, 1))
+        {
+            Debug.Log(hit.collider.name);
+            Debug.DrawRay(ray_position.transform.position, ray_position.transform.forward * hit.distance, Color.red);
+        }
         //meele
         //melee timer
         if (meele == true)
@@ -91,13 +99,15 @@ public class Player : MonoBehaviour
                 move = true;
             }
 
-            //moves camera's y-axis and building position
+            //moves camera's y-axis and ray_position
             if (movey != 0)
             {
                 //rotates camera's (up/down)
                 cam_first.transform.Rotate(movey, 0, 0);
 
                 cam_third.transform.Rotate(movey, 0, 0);
+
+                ray_position.transform.Rotate(movey, 0, 0);
 
                 if (move == false)
                 {
@@ -108,12 +118,6 @@ public class Player : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
 
-                Ray ray = new Ray(this.transform.position, transform.forward);
-                RaycastHit hit;
-                Physics.Raycast(ray, out hit, 4);
-                {
-
-                }
             }
             //move forward
             if (Input.GetKey(KeyCode.W))
@@ -187,22 +191,13 @@ public class Player : MonoBehaviour
                     move = true;
                 }
             }
-            //jump
+            //jumping
             if (Input.GetKey(KeyCode.Space))
             {
                 if (jumped == false)
                 {
                     playerR.AddForce(Vector3.up * 250);
                     jumped = true;
-                }
-            }
-            //once landed
-            if (jumped == true)
-            {
-                if (player_to_ground == 1)
-                {
-                    Debug.Log("Landed");
-                    jumped = false;
                 }
             }
             //aim
@@ -286,14 +281,15 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
 
         //scripts
-        scriptE = GameObject.Find("world").GetComponent<World>();
+        scriptE = GameObject.Find("World").GetComponent<World>();
 
         //player
         playerR = GetComponent<Rigidbody>();
+        ray_position = GameObject.Find("Ray Position");
 
         //camera's
-        cam_first = GameObject.Find("camera_FP").GetComponent<Camera>();
-        cam_third = GameObject.Find("camera_TP").GetComponent<Camera>();
+        cam_first = GameObject.Find("Camera_FP").GetComponent<Camera>();
+        cam_third = GameObject.Find("Camera_TP").GetComponent<Camera>();
 
         //UI
         waterText = GameObject.Find("Water_UI").GetComponent<Text>();
@@ -328,22 +324,18 @@ public class Player : MonoBehaviour
         waterText.text = "Water: " + waterValue.ToString();
         foodText.text = "Food: " + foodValue.ToString();
         tempText.text = tempValue.ToString() + "C";
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
     }
     public void OnCollisionEnter(Collision collision)
     {
-        //jumping
-        if(collision.gameObject.tag == "grounded")
+        //detects collision from the bottom of player
+        var normal = collision.GetContact(0).normal;
+        if (normal.y > 0)
         {
-            //detects collision from the bottom of player
-            var normal = collision.GetContact(0).normal;
-            if (normal.y > 0)
+            //resets jump
+            if (jumped == true)
             {
-                //resets jump
-                if (jumped == true)
-                {
-                    jumped = false;
-                }
+                jumped = false;
             }
         }
     }
