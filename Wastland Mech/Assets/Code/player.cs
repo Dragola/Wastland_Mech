@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Player : MonoBehaviour
 {
     //scripts
-    private World scriptE = null;
+    private World scriptW = null;
 
     //player
     public float movex = 0;
@@ -19,7 +19,6 @@ public class Player : MonoBehaviour
     private bool jumped = false;
     private GameObject ray_position = null;
     public bool move = false;
-
 
     //camera's
     private Camera cam_first;
@@ -46,6 +45,7 @@ public class Player : MonoBehaviour
     //inventory
     public GameObject reachable_object = null;
     public string[] inventory_objects = new  string[5];
+    public byte[] inventory_size = new byte[5];
 
     // Use this for initialization
     void Start()
@@ -215,6 +215,18 @@ public class Player : MonoBehaviour
                     move = true;
                 }
             }
+            //interact
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                //if the object is a resource then mine/collect it
+                if(reachable_object != null && reachable_object.tag.CompareTo("resource") == 0)
+                {
+                    if(reachable_object.GetComponentInParent<Resource>().GetHealth() > 0)
+                    {
+                        reachable_object.GetComponentInParent<Resource>().HitResource();
+                    }
+                }
+            }
             //jumping
             if (Input.GetKey(KeyCode.Space))
             {
@@ -261,8 +273,9 @@ public class Player : MonoBehaviour
 
             }
             //open inventory
-            if (Input.GetKey(KeyCode.I))
+            if (Input.GetKeyUp(KeyCode.I))
             {
+                Debug.Log("Open Inventory");
                 mainUI.SetActive(false);
                 inventoryUI.SetActive(true);
                 enable_inventory = true;
@@ -316,7 +329,7 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
 
         //scripts
-        scriptE = GameObject.Find("World").GetComponent<World>();
+        scriptW = GameObject.Find("World").GetComponent<World>();
 
         //player
         playerR = GetComponent<Rigidbody>();
@@ -372,15 +385,18 @@ public class Player : MonoBehaviour
         if (status)
         {
             //closes inventory and re-enables movement
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            if (Input.GetKey(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
             {
-                Debug.Log("Closed Inventory");
+                Debug.Log("Closing Inventory");
                 inventoryUI.SetActive(false);
                 mainUI.SetActive(true);
                 enable_movement = true;
                 enable_inventory = false;
             }
         }
+    }
+    private void ResourceCollect()
+    {
 
     }
     private void OnCollisionEnter(Collision collision)
