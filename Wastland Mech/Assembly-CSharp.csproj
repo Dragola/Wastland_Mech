@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Code\Player.cs" />
+    <Compile Include="Assets\Code\Resource.cs" />
     <Compile Include="Assets\Code\World.cs" />
     <None Include="Assets\Resources\save.txt" />
     <Reference Include="Unity.TextMeshPro.Editor">

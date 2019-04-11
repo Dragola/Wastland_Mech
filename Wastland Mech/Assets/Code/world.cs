@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 /*
@@ -14,7 +13,7 @@ public class World : MonoBehaviour
     public ushort dayDuration = 3600;
 
     //player
-    Transform player = null;
+    //Transform player = null;
 
     //power
     private byte power = 0; //gnerate based on number of power sources
@@ -30,7 +29,7 @@ public class World : MonoBehaviour
         sun = GameObject.Find("Sun");
 
         //player
-        player = GameObject.Find("Player").GetComponent<Transform>();
+        //player = GameObject.Find("Player").GetComponent<Transform>();
 
         //UI
         powerT = GameObject.Find("Power_UI").GetComponent<Text>();

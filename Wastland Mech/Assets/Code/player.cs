@@ -1,14 +1,12 @@
 ﻿using UnityEngine;
-using System.Collections;
 using UnityEngine.UI;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 public class Player : MonoBehaviour
 {
     //scripts
-    private World scriptE = null;
+    private World scriptW = null;
 
     //player
     public float movex = 0;
@@ -20,7 +18,7 @@ public class Player : MonoBehaviour
     bool meele = false;
     private bool jumped = false;
     private GameObject ray_position = null;
-
+    public bool move = false;
 
     //camera's
     private Camera cam_first;
@@ -28,22 +26,26 @@ public class Player : MonoBehaviour
     private bool firstPCam = true;
 
     //UI components
+    GameObject mainUI = null;
     Text waterText = null;
     Text foodText = null;
     Text tempText = null;
     int foodValue = 100;
     int waterValue = 100;
     int tempValue = 0;
+    GameObject inventoryUI = null;
 
     //bool aim = false;
-    public bool spawnB = false;
-    public bool placed = false;
-    public bool wireCheck = false;
-    public bool move = false;
 
-    //changes
-    private bool UI_change = false;
-    private bool player_change = false;
+    //enable and updating
+    private bool update_UI = false; //if UI needs to update
+    private bool enable_movement = true; //enables the player to move and interact
+    private bool enable_inventory = false;
+
+    //inventory
+    public GameObject reachable_object = null;
+    public string[] inventory_objects = new  string[5];
+    public byte[] inventory_size = new byte[5];
 
     // Use this for initialization
     void Start()
@@ -55,19 +57,38 @@ public class Player : MonoBehaviour
     void Update()
     {
         //player movement
-        Movement(true);
+        Movement(enable_movement);
+
         //UI updates (maybe run in a different script?)- don't need to technically
-        UI(false);
+        UI(update_UI);
+
+        //Inventory
+        Inventory(enable_inventory);
+
     }
     void FixedUpdate()
     {
-
+        //interaction
         RaycastHit hit;
         if(Physics.Raycast(ray_position.transform.position, ray_position.transform.forward, out hit, 1))
         {
-            Debug.Log(hit.collider.name);
-            Debug.DrawRay(ray_position.transform.position, ray_position.transform.forward * hit.distance, Color.red);
+            //if you interact with an object
+            if(reachable_object == null)
+            {
+                reachable_object = hit.collider.gameObject;
+            }
+            //if you interact with a new object
+            else if(reachable_object != hit.collider.gameObject)
+            {
+                reachable_object = hit.collider.gameObject;
+            }
         }
+        //if not interacting with anything then set reachable_object to null
+        else
+        {
+            reachable_object = null;
+        }
+
         //meele
         //melee timer
         if (meele == true)
@@ -80,9 +101,12 @@ public class Player : MonoBehaviour
 
         return true;
     }
-    public bool Movement(bool changed)
+
+    //player movement and interaction
+    public bool Movement(bool status)
     {
-        if (changed)
+        //if movement is enabled 
+        if (status)
         {
             //resets move detected
             move = false;
@@ -191,6 +215,18 @@ public class Player : MonoBehaviour
                     move = true;
                 }
             }
+            //interact
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                //if the object is a resource then mine/collect it
+                if(reachable_object != null && reachable_object.tag.CompareTo("resource") == 0)
+                {
+                    if(reachable_object.GetComponentInParent<Resource>().GetHealth() > 0)
+                    {
+                        reachable_object.GetComponentInParent<Resource>().HitResource();
+                    }
+                }
+            }
             //jumping
             if (Input.GetKey(KeyCode.Space))
             {
@@ -226,7 +262,7 @@ public class Player : MonoBehaviour
             {
                 if (Time.timeScale == 10)
                 {
-                    Time.timeScale = 10;
+                    Time.timeScale = 1;
                     Debug.Log("Speed normal");
                 }
                 else
@@ -235,6 +271,15 @@ public class Player : MonoBehaviour
                     Debug.Log("Speed up");
                 }
 
+            }
+            //open inventory
+            if (Input.GetKeyUp(KeyCode.I))
+            {
+                Debug.Log("Open Inventory");
+                mainUI.SetActive(false);
+                inventoryUI.SetActive(true);
+                enable_inventory = true;
+                enable_movement = false;
             }
             //quits game
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -246,13 +291,15 @@ public class Player : MonoBehaviour
         }
         return false;
     }
+
+    //Saves the game
     private void SaveGame()
     {
-        //file located
+        //path to the File
         string destination = "Assets/Resources/save.txt";
         FileStream file = null;
 
-        //if file exists then load
+        //Cehcks if File exists, it it does then grab, othwerwise create new File 
         if (File.Exists(destination)) {
             file = File.OpenWrite(destination);
         }
@@ -260,19 +307,20 @@ public class Player : MonoBehaviour
         {
             file = File.Create(destination);
         }
-        //writes to file
+        //File writer
         StreamWriter write = new StreamWriter(file);
 
-        //player position
+        //adds the player position to be written (Queue's it)
         write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
 
-        //pushes the output to the file
+        //pushes the output to the File
         write.Flush();
 
+        //closes File
         file.Close();
     }
 
-    //loads file
+    //Loads objects and save file (if present)
     private void LoadGame()
     {
 
@@ -281,7 +329,7 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
 
         //scripts
-        scriptE = GameObject.Find("World").GetComponent<World>();
+        scriptW = GameObject.Find("World").GetComponent<World>();
 
         //player
         playerR = GetComponent<Rigidbody>();
@@ -292,9 +340,12 @@ public class Player : MonoBehaviour
         cam_third = GameObject.Find("Camera_TP").GetComponent<Camera>();
 
         //UI
+        mainUI = GameObject.Find("MainUI");
+        inventoryUI = GameObject.Find("InventoryUI");
         waterText = GameObject.Find("Water_UI").GetComponent<Text>();
         foodText = GameObject.Find("Food_UI").GetComponent<Text>();
         tempText = GameObject.Find("Temp_UI").GetComponent<Text>();
+        inventoryUI.SetActive(false);
 
         //Loads previous save (if it exists
         string destination = "Assets/Resources/save.txt";
@@ -326,7 +377,29 @@ public class Player : MonoBehaviour
         tempText.text = tempValue.ToString() + "C";
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
     }
-    public void OnCollisionEnter(Collision collision)
+
+    //the invenetory method (interacting, opening and closing)
+    private void Inventory(bool status)
+    {
+        //if inventory is enabled
+        if (status)
+        {
+            //closes inventory and re-enables movement
+            if (Input.GetKey(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("Closing Inventory");
+                inventoryUI.SetActive(false);
+                mainUI.SetActive(true);
+                enable_movement = true;
+                enable_inventory = false;
+            }
+        }
+    }
+    private void ResourceCollect()
+    {
+
+    }
+    private void OnCollisionEnter(Collision collision)
     {
         //detects collision from the bottom of player
         var normal = collision.GetContact(0).normal;
@@ -339,4 +412,5 @@ public class Player : MonoBehaviour
             }
         }
     }
+    
 }
