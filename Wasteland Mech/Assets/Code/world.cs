@@ -31,13 +31,8 @@ public class World : MonoBehaviour
         //player
         //player = GameObject.Find("Player").GetComponent<Transform>();
 
-        //UI
-        powerT = GameObject.Find("Power_UI").GetComponent<Text>();
-
-        //buildings
-        power_prefabs.Add(Resources.Load("Prefabs/Power/solar_panel") as GameObject);
-        power_prefabs.Add(Resources.Load("Prefabs/Power/generator") as GameObject);
-        power_prefabs.Add(Resources.Load("Prefabs/Power/energy_storage") as GameObject);
+        
+        
 
     }
 
