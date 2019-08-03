@@ -5,27 +5,20 @@ using UnityEngine;
 public class Resource : MonoBehaviour
 {
     public byte health = 0;
+    private byte resourceType = 0;
     // Start is called before the first frame update
     void Start()
     {
-        if(this.gameObject.name == "Tree")
+        if(this.gameObject.name == "tree")
         {
-            health = 2;
+            health = 100;
+            resourceType = 0;
+
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    //returns health 
-    public byte GetHealth()
-    {
-        return this.health;
-    }
-    public void HitResource()
+    //when resource is hit
+    public byte HitResource()
     {
         //decrease resource health
         this.health--;
@@ -35,5 +28,7 @@ public class Resource : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+
+        return resourceType;
     }
 }

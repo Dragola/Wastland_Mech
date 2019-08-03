@@ -12,33 +12,40 @@ public class Player : MonoBehaviour
     public float movex = 0;
     public float movey = 0;
     private float distance = 0;
-    private int rotation_angle = 0;
+    private int rotationAngle = 0;
     private Rigidbody playerR = null;
-    public int meeletime = 15;
+    public int meeleTime = 15;
     bool meele = false;
     private bool jumped = false;
-    private GameObject ray_position = null;
-    public bool move = false;
+    private GameObject rayPosition = null;
+    private bool move = false;
 
     //camera's
-    private Camera cam_first;
-    private Camera cam_third;
-    private bool firstPCam = true;
+    private Camera cam_First;
+    private Camera cam_Third;
+    private bool firstPersonCamera = true;
 
     //UI components
-   
+    //private Text player_Health = null;
+    //private Text player_Food = null;
+    //private Text player_Water = null;
+    private Text player_Slot0 = null;
+    private Text player_Slot1 = null;
+    private Text player_Slot2 = null;
+    private Text player_Slot3 = null;
 
     //bool aim = false;
 
     //enable and updating
-    private bool update_UI = false; //if UI needs to update
-    private bool enable_movement = true; //enables the player to move and interact
-    private bool enable_inventory = false;
+    private byte update_UI = 0; //if UI needs to update
+    private bool enable_Movement = true; //enables the player to move and interact
+    private bool enable_Inventory = false;
 
     //inventory
-    public GameObject reachable_object = null;
-    public string[] inventory_objects = new  string[5];
-    public byte[] inventory_size = new byte[5];
+    private GameObject reachableObject = null;
+    public sbyte[] inventory_Slot = new sbyte[4];
+    public byte[] inventory_Size = new byte[4];
+    public string[] ITEM_NAMES = { "Wood","Rock"};
 
     // Use this for initialization
     void Start()
@@ -50,54 +57,102 @@ public class Player : MonoBehaviour
     void Update()
     {
         //player movement
-        Movement(enable_movement);
-
-        //UI updates (maybe run in a different script?)- don't need to technically
-        UI(update_UI);
+        Movement(enable_Movement);
 
         //Inventory
-        //Inventory(enable_inventory);
+        Inventory(enable_Inventory);
+
     }
     void FixedUpdate()
     {
         if (move)
         {
             //interaction
-            RaycastHit hit;
-            if (Physics.Raycast(ray_position.transform.position, ray_position.transform.forward, out hit, (float)1.5))
+            if (Physics.Raycast(rayPosition.transform.position, rayPosition.transform.forward, out RaycastHit hit, (float)1.5))
             {
                 //if you interact with an object
-                if (reachable_object == null)
+                if (reachableObject == null)
                 {
-                    reachable_object = hit.collider.gameObject;
-                    Debug.Log(reachable_object.name);
+                    reachableObject = hit.collider.gameObject;
+                    Debug.Log(reachableObject.name);
                 }
                 //if you interact with a new object
-                else if (reachable_object != hit.collider.gameObject)
+                else if (reachableObject != hit.collider.gameObject)
                 {
-                    reachable_object = hit.collider.gameObject;
-                    Debug.Log(reachable_object.name);
+                    reachableObject = hit.collider.gameObject;
+                    Debug.Log(reachableObject.name);
                 }
             }
             //if not interacting with anything then set reachable_object to null
             else
             {
-                reachable_object = null;
-                Debug.Log("Nothing reachable");
+                reachableObject = null;
             }
         }
-
         //meele
         //melee timer
         if (meele == true)
         {
-            meeletime -= 1;
+            meeleTime -= 1;
         }
+
+        return;
     }
-    private bool UI(bool changed)
+
+    //checks for update on inventory slot
+    private void InventoryUpdate(byte slot)
+    {
+        if (slot == 0)
+        {
+            player_Slot0.text = "" + ItemToString((byte)inventory_Slot[0]) + "x" + inventory_Size[0];
+        }
+        else if (slot == 1)
+        {
+            player_Slot1.text = "" + ItemToString((byte)inventory_Slot[1]) + "x" + inventory_Size[1];
+        }
+        else if (slot == 2)
+        {
+            player_Slot2.text = "" + ItemToString((byte)inventory_Slot[2]) + "x" + inventory_Size[2];
+        }
+        else if (slot == 3)
+        {
+            player_Slot3.text = "" + ItemToString((byte)inventory_Slot[3]) + "x" + inventory_Size[3];
+        }
+        return;
+    }
+
+    //adds item to inventory
+    private void InventoryAdd(byte item)
     {
 
-        return true;
+        bool slotFound = false;
+
+        for (byte i = 0; i < inventory_Slot.Length && !slotFound; i++)
+        {
+            //finds first open slot
+            if (inventory_Slot[i] < 0 && !slotFound)
+            {
+                inventory_Slot[i] = (sbyte)item;
+                inventory_Size[i]++;
+                slotFound = true;
+                InventoryUpdate(i);
+            }
+
+            //add to existing slot
+            else if (inventory_Slot[i] == item)
+            {
+                inventory_Size[i]++;
+                slotFound = true;
+                InventoryUpdate(i);
+            }
+        }
+        return;
+    }
+
+    //returns string of item
+    private string ItemToString(byte item)
+    {
+        return ITEM_NAMES[item];
     }
 
     //player movement and interaction
@@ -125,11 +180,11 @@ public class Player : MonoBehaviour
             if (movey != 0)
             {
                 //rotates camera's (up/down)
-                cam_first.transform.Rotate(movey, 0, 0);
+                cam_First.transform.Rotate(movey, 0, 0);
 
-                cam_third.transform.Rotate(movey, 0, 0);
+                cam_Third.transform.Rotate(movey, 0, 0);
 
-                ray_position.transform.Rotate(movey, 0, 0);
+                rayPosition.transform.Rotate(movey, 0, 0);
 
                 if (move == false)
                 {
@@ -216,13 +271,10 @@ public class Player : MonoBehaviour
             //interact
             if (Input.GetKeyDown(KeyCode.E))
             {
-                //if the object is a resource then mine/collect it
-                if(reachable_object != null && reachable_object.tag.CompareTo("resource") == 0)
+                //if the object is a resource then 
+                if (reachableObject != null && reachableObject.tag.CompareTo("resource") == 0)
                 {
-                    if(reachable_object.GetComponentInParent<Resource>().GetHealth() > 0)
-                    {
-                        reachable_object.GetComponentInParent<Resource>().HitResource();
-                    }
+                    InventoryAdd(reachableObject.GetComponentInParent<Resource>().HitResource());
                 }
             }
             //jumping
@@ -240,20 +292,20 @@ public class Player : MonoBehaviour
                 Debug.Log("Aim not implemented yet :(");
             }
             //first person
-            if (Input.GetKeyDown(KeyCode.Tab) && firstPCam == false)
+            if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
             {
                 playerR.GetComponent<MeshRenderer>().enabled = false;
-                cam_third.gameObject.SetActive(false);
-                cam_first.gameObject.SetActive(true);
-                firstPCam = true;
+                cam_Third.gameObject.SetActive(false);
+                cam_First.gameObject.SetActive(true);
+                firstPersonCamera = true;
             }
             //third person 
-            else if (Input.GetKeyDown(KeyCode.Tab) && firstPCam == true)
+            else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
             {
                 playerR.GetComponent<MeshRenderer>().enabled = true;
-                cam_first.gameObject.SetActive(false);
-                cam_third.gameObject.SetActive(true);
-                firstPCam = false;
+                cam_First.gameObject.SetActive(false);
+                cam_Third.gameObject.SetActive(true);
+                firstPersonCamera = false;
             }
             //speed up
             if (Input.GetKeyDown(KeyCode.KeypadPlus))
@@ -274,8 +326,8 @@ public class Player : MonoBehaviour
             if (Input.GetKeyUp(KeyCode.I))
             {
                 Debug.Log("Open Inventory");
-                enable_inventory = true;
-                enable_movement = false;
+                enable_Inventory = true;
+                enable_Movement = false;
             }
             //quits game
             if (Input.GetKeyDown(KeyCode.L))
@@ -283,20 +335,21 @@ public class Player : MonoBehaviour
                 SaveGame();
                 Application.Quit();
             }
-            
+
         }
         return false;
     }
 
-    //Saves the game
+    //Saves the game (WIP)
     private void SaveGame()
     {
         //path to the File
         string destination = "Assets/Resources/save.txt";
         FileStream file = null;
 
-        //Cehcks if File exists, it it does then grab, othwerwise create new File 
-        if (File.Exists(destination)) {
+        //Checks if file exists and pulls it, othwerwise creates a new file 
+        if (File.Exists(destination))
+        {
             file = File.OpenWrite(destination);
         }
         else
@@ -314,6 +367,8 @@ public class Player : MonoBehaviour
 
         //closes File
         file.Close();
+
+        return;
     }
 
     //Loads objects and save file (if present)
@@ -325,15 +380,21 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
 
         //scripts
-        scriptW = GameObject.Find("World").GetComponent<World>();
+        scriptW = GameObject.Find("world").GetComponent<World>();
 
         //player
         playerR = GetComponent<Rigidbody>();
-        ray_position = GameObject.Find("Ray_position");
+        rayPosition = GameObject.Find("ray_Position");
 
         //camera's
-        cam_first = GameObject.Find("Camera_FP").GetComponent<Camera>();
-        cam_third = GameObject.Find("Camera_TP").GetComponent<Camera>();
+        cam_First = GameObject.Find("camera_FP").GetComponent<Camera>();
+        cam_Third = GameObject.Find("camera_TP").GetComponent<Camera>();
+
+        //inventory
+        player_Slot0 = GameObject.Find("player_Slot0").GetComponent<Text>();
+        player_Slot1 = GameObject.Find("player_Slot1").GetComponent<Text>();
+        player_Slot2 = GameObject.Find("player_Slot2").GetComponent<Text>();
+        player_Slot3 = GameObject.Find("player_Slot3").GetComponent<Text>();
 
         //Loads previous save (if it exists
         string destination = "Assets/Resources/save.txt";
@@ -352,37 +413,45 @@ public class Player : MonoBehaviour
             //player position
             string[] playerData = line.Split(',');
             Vector3 playerPOS = new Vector3(float.Parse(playerData[0]), float.Parse(playerData[1]), float.Parse(playerData[2]));
-            gameObject.transform.SetPositionAndRotation(playerPOS, Quaternion.Euler(0,0,0));
+            gameObject.transform.SetPositionAndRotation(playerPOS, Quaternion.Euler(0, 0, 0));
 
             file.Close();
         }
 
         //settings before game starts (change later when saving is implemented)
-        cam_third.gameObject.SetActive(false);
+        cam_Third.gameObject.SetActive(false);
         playerR.GetComponent<MeshRenderer>().enabled = false;
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
+
+        return;
     }
 
-    /* //the invenetory method (interacting, opening and closing)
-     private void Inventory(bool status)
-     {
-         //if inventory is enabled
-         if (status)
-         {
-             //closes inventory and re-enables movement
-             if (Input.GetKey(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
-             {
-                 Debug.Log("Closing Inventory");
-                 enable_movement = true;
-                 enable_inventory = false;
-             }
-         }
-     }
-     */
+    //the invenetory method (interacting, opening and closing)
+    private void Inventory(bool status)
+    {
+        //if inventory is enabled
+        if (status)
+        {
+
+            //closes inventory and re-enables movement
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log("Closing Inventory");
+                enable_Movement = true;
+                enable_Inventory = false;
+            }
+        }
+
+        return;
+    }
+
+    //collision detection
     private void OnCollisionEnter(Collision collision)
     {
         //detects collision from the bottom of player
         var normal = collision.GetContact(0).normal;
+
+        //if bottom of collider hits object
         if (normal.y > 0)
         {
             //resets jump
@@ -391,6 +460,7 @@ public class Player : MonoBehaviour
                 jumped = false;
             }
         }
+        return;
     }
-    
+
 }
