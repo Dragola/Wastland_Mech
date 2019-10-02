@@ -21,31 +21,31 @@ public class Player : MonoBehaviour
     private bool move = false;
 
     //camera's
-    private Camera cam_First;
-    private Camera cam_Third;
+    private Camera camFirst;
+    private Camera camThird;
     private bool firstPersonCamera = true;
 
     //UI components
     //private Text player_Health = null;
     //private Text player_Food = null;
     //private Text player_Water = null;
-    private Text player_Slot0 = null;
-    private Text player_Slot1 = null;
-    private Text player_Slot2 = null;
-    private Text player_Slot3 = null;
+    private Text playerSlot0 = null;
+    private Text playerSlot1 = null;
+    private Text playerSlot2 = null;
+    private Text playerSlot3 = null;
 
     //bool aim = false;
 
     //enable and updating
     private byte update_UI = 0; //if UI needs to update
-    private bool enable_Movement = true; //enables the player to move and interact
-    private bool enable_Inventory = false;
+    private bool enableMovement = true; //enables the player to move and interact
+    private bool enableInventory = false;
 
     //inventory
     private GameObject reachableObject = null;
-    public sbyte[] inventory_Slot = new sbyte[4];
-    public byte[] inventory_Size = new byte[4];
-    public string[] ITEM_NAMES = { "Wood","Rock"};
+    public sbyte[] inventorySlot = new sbyte[4];
+    public byte[] inventorySize = new byte[4];
+    public string[] ITEMNAMES = { "Wood","Rock"};
 
     // Use this for initialization
     void Start()
@@ -57,10 +57,10 @@ public class Player : MonoBehaviour
     void Update()
     {
         //player movement
-        Movement(enable_Movement);
+        Movement(enableMovement);
 
         //Inventory
-        Inventory(enable_Inventory);
+        Inventory(enableInventory);
 
     }
     void FixedUpdate()
@@ -104,19 +104,19 @@ public class Player : MonoBehaviour
     {
         if (slot == 0)
         {
-            player_Slot0.text = "" + ItemToString((byte)inventory_Slot[0]) + "x" + inventory_Size[0];
+            playerSlot0.text = "" + ItemToString((byte)inventorySlot[0]) + "x" + inventorySize[0];
         }
         else if (slot == 1)
         {
-            player_Slot1.text = "" + ItemToString((byte)inventory_Slot[1]) + "x" + inventory_Size[1];
+            playerSlot1.text = "" + ItemToString((byte)inventorySlot[1]) + "x" + inventorySize[1];
         }
         else if (slot == 2)
         {
-            player_Slot2.text = "" + ItemToString((byte)inventory_Slot[2]) + "x" + inventory_Size[2];
+            playerSlot2.text = "" + ItemToString((byte)inventorySlot[2]) + "x" + inventorySize[2];
         }
         else if (slot == 3)
         {
-            player_Slot3.text = "" + ItemToString((byte)inventory_Slot[3]) + "x" + inventory_Size[3];
+            playerSlot3.text = "" + ItemToString((byte)inventorySlot[3]) + "x" + inventorySize[3];
         }
         return;
     }
@@ -127,21 +127,21 @@ public class Player : MonoBehaviour
 
         bool slotFound = false;
 
-        for (byte i = 0; i < inventory_Slot.Length && !slotFound; i++)
+        for (byte i = 0; i < inventorySlot.Length && !slotFound; i++)
         {
             //finds first open slot
-            if (inventory_Slot[i] < 0 && !slotFound)
+            if (inventorySlot[i] < 0 && !slotFound)
             {
-                inventory_Slot[i] = (sbyte)item;
-                inventory_Size[i]++;
+                inventorySlot[i] = (sbyte)item;
+                inventorySize[i]++;
                 slotFound = true;
                 InventoryUpdate(i);
             }
 
             //add to existing slot
-            else if (inventory_Slot[i] == item)
+            else if (inventorySlot[i] == item)
             {
-                inventory_Size[i]++;
+                inventorySize[i]++;
                 slotFound = true;
                 InventoryUpdate(i);
             }
@@ -152,7 +152,7 @@ public class Player : MonoBehaviour
     //returns string of item
     private string ItemToString(byte item)
     {
-        return ITEM_NAMES[item];
+        return ITEMNAMES[item];
     }
 
     //player movement and interaction
@@ -180,9 +180,9 @@ public class Player : MonoBehaviour
             if (movey != 0)
             {
                 //rotates camera's (up/down)
-                cam_First.transform.Rotate(movey, 0, 0);
+                camFirst.transform.Rotate(movey, 0, 0);
 
-                cam_Third.transform.Rotate(movey, 0, 0);
+                camThird.transform.Rotate(movey, 0, 0);
 
                 rayPosition.transform.Rotate(movey, 0, 0);
 
@@ -295,16 +295,16 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
             {
                 playerR.GetComponent<MeshRenderer>().enabled = false;
-                cam_Third.gameObject.SetActive(false);
-                cam_First.gameObject.SetActive(true);
+                camThird.gameObject.SetActive(false);
+                camFirst.gameObject.SetActive(true);
                 firstPersonCamera = true;
             }
             //third person 
             else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
             {
                 playerR.GetComponent<MeshRenderer>().enabled = true;
-                cam_First.gameObject.SetActive(false);
-                cam_Third.gameObject.SetActive(true);
+                camFirst.gameObject.SetActive(false);
+                camThird.gameObject.SetActive(true);
                 firstPersonCamera = false;
             }
             //speed up
@@ -326,8 +326,8 @@ public class Player : MonoBehaviour
             if (Input.GetKeyUp(KeyCode.I))
             {
                 Debug.Log("Open Inventory");
-                enable_Inventory = true;
-                enable_Movement = false;
+                enableInventory = true;
+                enableMovement = false;
             }
             //quits game
             if (Input.GetKeyDown(KeyCode.L))
@@ -384,17 +384,17 @@ public class Player : MonoBehaviour
 
         //player
         playerR = GetComponent<Rigidbody>();
-        rayPosition = GameObject.Find("ray_Position");
+        rayPosition = GameObject.Find("rayPosition");
 
         //camera's
-        cam_First = GameObject.Find("camera_FP").GetComponent<Camera>();
-        cam_Third = GameObject.Find("camera_TP").GetComponent<Camera>();
+        camFirst = GameObject.Find("cameraFP").GetComponent<Camera>();
+        camThird = GameObject.Find("cameraTP").GetComponent<Camera>();
 
         //inventory
-        player_Slot0 = GameObject.Find("player_Slot0").GetComponent<Text>();
-        player_Slot1 = GameObject.Find("player_Slot1").GetComponent<Text>();
-        player_Slot2 = GameObject.Find("player_Slot2").GetComponent<Text>();
-        player_Slot3 = GameObject.Find("player_Slot3").GetComponent<Text>();
+        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Text>();
+        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Text>();
+        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Text>();
+        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Text>();
 
         //Loads previous save (if it exists
         string destination = "Assets/Resources/save.txt";
@@ -419,7 +419,7 @@ public class Player : MonoBehaviour
         }
 
         //settings before game starts (change later when saving is implemented)
-        cam_Third.gameObject.SetActive(false);
+        camThird.gameObject.SetActive(false);
         playerR.GetComponent<MeshRenderer>().enabled = false;
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
 
@@ -437,8 +437,8 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
             {
                 Debug.Log("Closing Inventory");
-                enable_Movement = true;
-                enable_Inventory = false;
+                enableMovement = true;
+                enableInventory = false;
             }
         }
 

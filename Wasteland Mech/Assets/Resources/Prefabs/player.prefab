@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 221496675}
   - component: {fileID: 221496674}
   m_Layer: 5
-  m_Name: player_UI
+  m_Name: playerUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -115,7 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 411337718}
   m_Layer: 0
-  m_Name: ray_Position
+  m_Name: rayPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 645376232}
   - component: {fileID: 645376231}
   m_Layer: 5
-  m_Name: player_Health
+  m_Name: playerHealthUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,8 +198,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -226,7 +224,7 @@ GameObject:
   - component: {fileID: 1786175054}
   - component: {fileID: 1786175053}
   m_Layer: 5
-  m_Name: player_Food
+  m_Name: playerFoodUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -277,8 +275,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -305,7 +301,7 @@ GameObject:
   - component: {fileID: 1966734166}
   - component: {fileID: 1966734165}
   m_Layer: 5
-  m_Name: player_Water
+  m_Name: playerWaterUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -356,8 +352,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -385,7 +379,7 @@ GameObject:
   - component: {fileID: 124294803355633990}
   - component: {fileID: 81988159390410330}
   m_Layer: 0
-  m_Name: camera_FP
+  m_Name: cameraFP
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -526,8 +520,6 @@ MonoBehaviour:
   movex: 0
   movey: 0
   meeleTime: 15
-  move: 0
-  reachableObject: {fileID: 0}
   inventory_Slot: 00000000
   inventory_Size: 00000000
   ITEM_NAMES:
@@ -613,7 +605,7 @@ GameObject:
   - component: {fileID: 124730402439140964}
   - component: {fileID: 65269931560120486}
   m_Layer: 0
-  m_Name: camera_TP
+  m_Name: cameraTP
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -706,7 +698,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4755245319335700}
   m_Layer: 0
-  m_Name: player_Hand
+  m_Name: playerHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -739,7 +731,7 @@ GameObject:
   - component: {fileID: 3441966456443082045}
   - component: {fileID: 5496050283660834667}
   m_Layer: 5
-  m_Name: player_Slot1
+  m_Name: playerSlot1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -790,8 +782,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -818,7 +808,7 @@ GameObject:
   - component: {fileID: 3170815556033770598}
   - component: {fileID: 6824506737652156418}
   m_Layer: 5
-  m_Name: player_Slot0
+  m_Name: playerSlot0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -869,8 +859,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -897,7 +885,7 @@ GameObject:
   - component: {fileID: 2692619280585331265}
   - component: {fileID: 1961158895960715530}
   m_Layer: 5
-  m_Name: player_Slot3
+  m_Name: playerSlot3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -948,8 +936,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -976,7 +962,7 @@ GameObject:
   - component: {fileID: 4632146725529690056}
   - component: {fileID: 6968927041209132235}
   m_Layer: 5
-  m_Name: player_Slot2
+  m_Name: playerSlot2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1027,8 +1013,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_FontSize: 70
@@ -1110,10 +1094,15 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6219906799087375352, guid: 7ed25134994d5b242ac2505023875178,
+        type: 3}
+      propertyPath: m_Name
+      value: pistolBody
+      objectReference: {fileID: 0}
     - target: {fileID: 6220014798842295366, guid: 7ed25134994d5b242ac2505023875178,
         type: 3}
       propertyPath: m_Name
-      value: weapon_End
+      value: pistolEnd
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ed25134994d5b242ac2505023875178, type: 3}
