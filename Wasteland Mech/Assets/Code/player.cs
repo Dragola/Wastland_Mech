@@ -11,14 +11,13 @@ public class Player : MonoBehaviour
     //player
     public float movex = 0;
     public float movey = 0;
-    private float distance = 0;
-    private int rotationAngle = 0;
     private Rigidbody playerR = null;
     public int meeleTime = 15;
     bool meele = false;
     private bool jumped = false;
     private GameObject rayPosition = null;
     private bool move = false;
+    public bool inventoryKeyHit = false;
 
     //camera's
     private Camera camFirst;
@@ -45,7 +44,7 @@ public class Player : MonoBehaviour
     private GameObject reachableObject = null;
     public sbyte[] inventorySlot = new sbyte[4];
     public byte[] inventorySize = new byte[4];
-    public string[] ITEMNAMES = { "Wood","Rock"};
+    public string[] ITEMNAMES = { "Wood", "Rock" };
 
     // Use this for initialization
     void Start()
@@ -323,9 +322,8 @@ public class Player : MonoBehaviour
 
             }
             //open inventory
-            if (Input.GetKeyUp(KeyCode.I))
+            if (Input.GetKeyDown(KeyCode.I))
             {
-                Debug.Log("Open Inventory");
                 enableInventory = true;
                 enableMovement = false;
             }
@@ -432,16 +430,19 @@ public class Player : MonoBehaviour
         //if inventory is enabled
         if (status)
         {
-
-            //closes inventory and re-enables movement
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.I))
+            //detects when inventory key is released (prevents opening and closing at same time)
+            if (Input.GetKeyUp(KeyCode.I))
             {
-                Debug.Log("Closing Inventory");
+                inventoryKeyHit = true;
+            }
+            //closes inventory and re-enables movement
+            if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
+            {
                 enableMovement = true;
                 enableInventory = false;
+                inventoryKeyHit = false;
             }
         }
-
         return;
     }
 
@@ -462,5 +463,4 @@ public class Player : MonoBehaviour
         }
         return;
     }
-
 }
