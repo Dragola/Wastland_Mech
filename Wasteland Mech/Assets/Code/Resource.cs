@@ -15,6 +15,11 @@ public class Resource : MonoBehaviour
             resourceType = 0;
 
         }
+        else if (this.gameObject.name == "rock")
+        {
+            health = 1;
+            resourceType = 1;
+        } 
     }
 
     //when resource is hit

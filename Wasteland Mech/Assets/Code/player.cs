@@ -123,13 +123,12 @@ public class Player : MonoBehaviour
     //adds item to inventory
     private void InventoryAdd(byte item)
     {
-
         bool slotFound = false;
 
         for (byte i = 0; i < inventorySlot.Length && !slotFound; i++)
         {
             //finds first open slot
-            if (inventorySlot[i] < 0 && !slotFound)
+            if (inventorySlot[i] == 0 && !slotFound)
             {
                 inventorySlot[i] = (sbyte)item;
                 inventorySize[i]++;
