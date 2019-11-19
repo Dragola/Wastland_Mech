@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Resource : MonoBehaviour
 {
@@ -11,15 +9,22 @@ public class Resource : MonoBehaviour
     {
         if(this.gameObject.name == "tree")
         {
-            health = 100;
-            resourceType = 0;
+            health = 200;
 
         }
         else if (this.gameObject.name == "rock")
         {
             health = 1;
             resourceType = 1;
-        } 
+        }
+        else if (this.gameObject.name == "wood")
+        {
+            health = 1;
+        }
+        else
+        {
+            health = 1;
+        }
     }
 
     //when resource is hit

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
-using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
@@ -18,6 +18,7 @@ public class Player : MonoBehaviour
     private GameObject rayPosition = null;
     private bool move = false;
     public bool inventoryKeyHit = false;
+    public sbyte slotSelected= -1;
 
     //camera's
     private Camera camFirst;
@@ -28,10 +29,11 @@ public class Player : MonoBehaviour
     //private Text player_Health = null;
     //private Text player_Food = null;
     //private Text player_Water = null;
-    private Text playerSlot0 = null;
-    private Text playerSlot1 = null;
-    private Text playerSlot2 = null;
-    private Text playerSlot3 = null;
+    private Button playerSlot0 = null;
+    private Button playerSlot1 = null;
+    private Button playerSlot2 = null;
+    private Button playerSlot3 = null;
+    public Button playerDrop = null;
 
     //bool aim = false;
 
@@ -44,7 +46,7 @@ public class Player : MonoBehaviour
     private GameObject reachableObject = null;
     public sbyte[] inventorySlot = new sbyte[4];
     public byte[] inventorySize = new byte[4];
-    public string[] ITEMNAMES = { "Wood", "Rock" };
+    public string[] ITEMNAMES = { "wood", "rock" };
 
     // Use this for initialization
     void Start()
@@ -62,6 +64,8 @@ public class Player : MonoBehaviour
         Inventory(enableInventory);
 
     }
+
+    //------------------------------------------------------------------------------------Physics and constants
     void FixedUpdate()
     {
         if (move)
@@ -98,61 +102,7 @@ public class Player : MonoBehaviour
         return;
     }
 
-    //checks for update on inventory slot
-    private void InventoryUpdate(byte slot)
-    {
-        if (slot == 0)
-        {
-            playerSlot0.text = "" + ItemToString((byte)inventorySlot[0]) + "x" + inventorySize[0];
-        }
-        else if (slot == 1)
-        {
-            playerSlot1.text = "" + ItemToString((byte)inventorySlot[1]) + "x" + inventorySize[1];
-        }
-        else if (slot == 2)
-        {
-            playerSlot2.text = "" + ItemToString((byte)inventorySlot[2]) + "x" + inventorySize[2];
-        }
-        else if (slot == 3)
-        {
-            playerSlot3.text = "" + ItemToString((byte)inventorySlot[3]) + "x" + inventorySize[3];
-        }
-        return;
-    }
-
-    //adds item to inventory
-    private void InventoryAdd(byte item)
-    {
-        bool slotFound = false;
-
-        for (byte i = 0; i < inventorySlot.Length && !slotFound; i++)
-        {
-            //finds first open slot
-            if (inventorySlot[i] == 0 && !slotFound)
-            {
-                inventorySlot[i] = (sbyte)item;
-                inventorySize[i]++;
-                slotFound = true;
-                InventoryUpdate(i);
-            }
-
-            //add to existing slot
-            else if (inventorySlot[i] == item)
-            {
-                inventorySize[i]++;
-                slotFound = true;
-                InventoryUpdate(i);
-            }
-        }
-        return;
-    }
-
-    //returns string of item
-    private string ItemToString(byte item)
-    {
-        return ITEMNAMES[item];
-    }
-
+    //------------------------------------------------------------------------------------Movement
     //player movement and interaction
     public bool Movement(bool status)
     {
@@ -337,6 +287,179 @@ public class Player : MonoBehaviour
         return false;
     }
 
+    //collision detection
+    private void OnCollisionEnter(Collision collision)
+    {
+        //detects collision from the bottom of player
+        var normal = collision.GetContact(0).normal;
+
+        //if bottom of collider hits object
+        if (normal.y > 0)
+        {
+            //resets jump
+            if (jumped == true)
+            {
+                jumped = false;
+            }
+        }
+        return;
+    }
+    //------------------------------------------------------------------------------------Inventory
+    //the invenetory method (interacting, opening and closing)
+    private void Inventory(bool status)
+    {
+        //if inventory is enabled
+        if (status)
+        {
+            //detects when inventory key is released (prevents opening and closing at same time)
+            if (Input.GetKeyUp(KeyCode.I) && inventoryKeyHit == false)
+            {
+                inventoryKeyHit = true;
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                
+            }
+            //closes inventory(resets variables and hides buttons) and re-enables movement
+            else if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
+            {
+                playerDrop.gameObject.SetActive(false);
+                slotSelected = -1;
+                enableMovement = true;
+                enableInventory = false;
+                inventoryKeyHit = false;
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
+        return;
+    }
+
+    //checks for update on inventory slot
+    private void InventoryUpdate(byte slot)
+    {
+        if (slot == 0)
+        {
+            //enables button if inventory slot has item
+            if (playerSlot0.enabled == false)
+            {
+                playerSlot0.enabled = true;
+            }
+            playerSlot0.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[0]) + "x" + inventorySize[0];
+        }
+        else if (slot == 1)
+        {
+            //enables button if inventory slot has item
+            if (playerSlot1.enabled == false)
+            {
+                playerSlot1.enabled = true;
+            }
+            playerSlot1.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[1]) + "x" + inventorySize[1];
+        }
+        else if (slot == 2)
+        {
+            //enables button if inventory slot has item
+            if (playerSlot2.enabled == false)
+            {
+                playerSlot2.enabled = true;
+            }
+            playerSlot2.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[2]) + "x" + inventorySize[2];
+        }
+        else if (slot == 3)
+        {
+            //enables button if inventory slot has item
+            if (playerSlot3.enabled == false)
+            {
+                playerSlot3.enabled = true;
+            }
+            playerSlot3.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[3]) + "x" + inventorySize[3];
+        }
+        return;
+    }
+
+    //adds item to inventory
+    private void InventoryAdd(byte item)
+    {
+        //first free slot incase item isn't in inventory
+        sbyte firstFreeSlot = -1;
+        bool slotFound = false;
+
+        for (byte i = 0; i < inventorySlot.Length ; i++)
+        {
+            //finds first open slot and marks
+            if (inventorySlot[i] == -1 && firstFreeSlot == -1)
+            {
+                firstFreeSlot = (sbyte)i;
+            }
+
+            //add to existing slot
+            else if (inventorySlot[i] == item && inventorySize[i] != 100)
+            {
+                slotFound = true;
+                inventorySize[i]++;
+                InventoryUpdate(i);
+            }
+        }
+
+        //if item isn't in inventory and inventory isn't full
+        if (slotFound == false && firstFreeSlot != -1)
+        {
+            inventorySlot[firstFreeSlot] = (sbyte)item;
+            inventorySize[firstFreeSlot]++;
+            InventoryUpdate((byte)firstFreeSlot);
+        }
+        return;
+    }
+
+    //returns string of item
+    private string ItemToString(byte item)
+    {
+        return ITEMNAMES[item];
+    }
+
+    //reads which inventory button was hit
+    public void InventoryButton()
+    {
+        string buttonName = EventSystem.current.currentSelectedGameObject.name;
+
+        //selects the inventory slot and enables the drop button
+        if (buttonName.CompareTo("playerSlot0") == 0)
+        {
+            slotSelected = 0;
+
+            playerDrop.gameObject.SetActive(true);
+        }
+        else if (buttonName.CompareTo("playerSlot1") == 0)
+        {
+            slotSelected = 1;
+
+            playerDrop.gameObject.SetActive(true);
+        }
+        else if (buttonName.CompareTo("playerSlot2") == 0)
+        {
+            slotSelected = 2;
+            playerDrop.gameObject.SetActive(true);
+        }
+        else if (buttonName.CompareTo("playerSlot3") == 0)
+        {
+            slotSelected = 3;
+            playerDrop.gameObject.SetActive(true);
+        }
+
+        //drop the item that was selected
+        else if (buttonName.CompareTo("playerDrop") == 0)
+        {
+            if (slotSelected != -1 && inventorySize[slotSelected] > 0)
+            {
+                GameObject item = (GameObject)(Resources.Load("Prefabs/" + ItemToString((byte)inventorySlot[slotSelected])));
+                Debug.Log("Item's name =" + item.name);
+                Instantiate(item, GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
+                inventorySize[slotSelected]--;
+                InventoryUpdate((byte)slotSelected);
+            }
+        }
+    }
+
+    //------------------------------------------------------------------------------------Load && Save Game
     //Saves the game (WIP)
     private void SaveGame()
     {
@@ -367,7 +490,7 @@ public class Player : MonoBehaviour
 
         return;
     }
-
+    
     //Loads objects and save file (if present)
     private void LoadGame()
     {
@@ -388,10 +511,16 @@ public class Player : MonoBehaviour
         camThird = GameObject.Find("cameraTP").GetComponent<Camera>();
 
         //inventory
-        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Text>();
-        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Text>();
-        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Text>();
-        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Text>();
+        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Button>();
+        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Button>();
+        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
+        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
+        playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
+        playerSlot0.enabled = false;
+        playerSlot1.enabled = false;
+        playerSlot2.enabled = false;
+        playerSlot3.enabled = false;
+        playerDrop.gameObject.SetActive(false);
 
         //Loads previous save (if it exists
         string destination = "Assets/Resources/save.txt";
@@ -420,45 +549,11 @@ public class Player : MonoBehaviour
         playerR.GetComponent<MeshRenderer>().enabled = false;
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
 
-        return;
-    }
-
-    //the invenetory method (interacting, opening and closing)
-    private void Inventory(bool status)
-    {
-        //if inventory is enabled
-        if (status)
+        //fill inventorySlot with -1's for default and inventory Size with 0
+        for (byte i=0; i < inventorySlot.Length; i++)
         {
-            //detects when inventory key is released (prevents opening and closing at same time)
-            if (Input.GetKeyUp(KeyCode.I))
-            {
-                inventoryKeyHit = true;
-            }
-            //closes inventory and re-enables movement
-            if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
-            {
-                enableMovement = true;
-                enableInventory = false;
-                inventoryKeyHit = false;
-            }
-        }
-        return;
-    }
-
-    //collision detection
-    private void OnCollisionEnter(Collision collision)
-    {
-        //detects collision from the bottom of player
-        var normal = collision.GetContact(0).normal;
-
-        //if bottom of collider hits object
-        if (normal.y > 0)
-        {
-            //resets jump
-            if (jumped == true)
-            {
-                jumped = false;
-            }
+            inventorySlot[i] = -1;
+            inventorySize[i] = 0;
         }
         return;
     }
