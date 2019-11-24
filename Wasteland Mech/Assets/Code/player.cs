@@ -17,8 +17,6 @@ public class Player : MonoBehaviour
     private bool jumped = false;
     private GameObject rayPosition = null;
     private bool move = false;
-    public bool inventoryKeyHit = false;
-    public sbyte slotSelected= -1;
 
     //camera's
     private Camera camFirst;
@@ -44,9 +42,11 @@ public class Player : MonoBehaviour
 
     //inventory
     private GameObject reachableObject = null;
-    public sbyte[] inventorySlot = new sbyte[4];
+    public string[] inventorySlot = new string[4];
     public byte[] inventorySize = new byte[4];
-    public string[] ITEMNAMES = { "wood", "rock" };
+    public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
+    public bool inventoryKeyHit = false;
+    public sbyte slotSelected = -1;
 
     // Use this for initialization
     void Start()
@@ -142,7 +142,11 @@ public class Player : MonoBehaviour
             //melee detection
             if (Input.GetMouseButtonDown(0))
             {
-
+                //if  object is a harvestable resource (tree, rock, etc.) then mine (move to melee later)
+                if (reachableObject != null && reachableObject.tag.CompareTo("harvestable") == 0)
+                {
+                    
+                }
             }
             //move forward
             if (Input.GetKey(KeyCode.W))
@@ -219,10 +223,12 @@ public class Player : MonoBehaviour
             //interact
             if (Input.GetKeyDown(KeyCode.E))
             {
-                //if the object is a resource then 
-                if (reachableObject != null && reachableObject.tag.CompareTo("resource") == 0)
+                //if object can be picked up (resource/item)
+                if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
                 {
-                    InventoryAdd(reachableObject.GetComponentInParent<Resource>().HitResource());
+                    InventoryAdd(reachableObject.name);
+                    Destroy(reachableObject);
+                    reachableObject = null;
                 }
             }
             //jumping
@@ -344,7 +350,7 @@ public class Player : MonoBehaviour
             {
                 playerSlot0.enabled = true;
             }
-            playerSlot0.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[0]) + "x" + inventorySize[0];
+            playerSlot0.GetComponentInChildren<Text>().text = "" + inventorySlot[0] + "x" + inventorySize[0];
         }
         else if (slot == 1)
         {
@@ -353,7 +359,7 @@ public class Player : MonoBehaviour
             {
                 playerSlot1.enabled = true;
             }
-            playerSlot1.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[1]) + "x" + inventorySize[1];
+            playerSlot1.GetComponentInChildren<Text>().text = "" + inventorySlot[1] + "x" + inventorySize[1];
         }
         else if (slot == 2)
         {
@@ -362,7 +368,7 @@ public class Player : MonoBehaviour
             {
                 playerSlot2.enabled = true;
             }
-            playerSlot2.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[2]) + "x" + inventorySize[2];
+            playerSlot2.GetComponentInChildren<Text>().text = "" + inventorySlot[2] + "x" + inventorySize[2];
         }
         else if (slot == 3)
         {
@@ -371,13 +377,13 @@ public class Player : MonoBehaviour
             {
                 playerSlot3.enabled = true;
             }
-            playerSlot3.GetComponentInChildren<Text>().text = "" + ItemToString((byte)inventorySlot[3]) + "x" + inventorySize[3];
+            playerSlot3.GetComponentInChildren<Text>().text = "" + inventorySlot[3] + "x" + inventorySize[3];
         }
         return;
     }
 
     //adds item to inventory
-    private void InventoryAdd(byte item)
+    private void InventoryAdd( string item)
     {
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
@@ -386,13 +392,13 @@ public class Player : MonoBehaviour
         for (byte i = 0; i < inventorySlot.Length ; i++)
         {
             //finds first open slot and marks
-            if (inventorySlot[i] == -1 && firstFreeSlot == -1)
+            if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
             {
                 firstFreeSlot = (sbyte)i;
             }
 
             //add to existing slot
-            else if (inventorySlot[i] == item && inventorySize[i] != 100)
+            else if (inventorySlot[i].CompareTo(item) == 0 && inventorySize[i] != 100)
             {
                 slotFound = true;
                 inventorySize[i]++;
@@ -403,17 +409,11 @@ public class Player : MonoBehaviour
         //if item isn't in inventory and inventory isn't full
         if (slotFound == false && firstFreeSlot != -1)
         {
-            inventorySlot[firstFreeSlot] = (sbyte)item;
+            inventorySlot[firstFreeSlot] = item;
             inventorySize[firstFreeSlot]++;
             InventoryUpdate((byte)firstFreeSlot);
         }
         return;
-    }
-
-    //returns string of item
-    private string ItemToString(byte item)
-    {
-        return ITEMNAMES[item];
     }
 
     //reads which inventory button was hit
@@ -450,7 +450,7 @@ public class Player : MonoBehaviour
         {
             if (slotSelected != -1 && inventorySize[slotSelected] > 0)
             {
-                GameObject item = (GameObject)(Resources.Load("Prefabs/" + ItemToString((byte)inventorySlot[slotSelected])));
+                GameObject item = (GameObject)(Resources.Load("Prefabs/" + inventorySlot[slotSelected]));
                 Debug.Log("Item's name =" + item.name);
                 Instantiate(item, GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
                 inventorySize[slotSelected]--;
@@ -552,7 +552,7 @@ public class Player : MonoBehaviour
         //fill inventorySlot with -1's for default and inventory Size with 0
         for (byte i=0; i < inventorySlot.Length; i++)
         {
-            inventorySlot[i] = -1;
+            inventorySlot[i] = "";
             inventorySize[i] = 0;
         }
         return;
