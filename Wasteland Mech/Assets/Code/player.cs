@@ -9,8 +9,8 @@ public class Player : MonoBehaviour
     private World scriptW = null;
 
     //player
-    public float movex = 0;
-    public float movey = 0;
+    public float moveX = 0;
+    public float moveY = 0;
     private Rigidbody playerR = null;
     public int meeleTime = 15;
     bool meele = false;
@@ -42,8 +42,8 @@ public class Player : MonoBehaviour
 
     //inventory
     private GameObject reachableObject = null;
-    public string[] inventorySlot = new string[4];
-    public byte[] inventorySize = new byte[4];
+    public string[] inventorySlot;
+    public byte[] inventorySize;
     public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
     public bool inventoryKeyHit = false;
     public sbyte slotSelected = -1;
@@ -51,6 +51,10 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        //have to size arrays after initialization vs during.
+        inventorySlot = new string[4];
+        inventorySize = new byte[4];
+
         //loads previous save (if any) and sets everything up
         LoadGame();
     }
@@ -77,13 +81,13 @@ public class Player : MonoBehaviour
                 if (reachableObject == null)
                 {
                     reachableObject = hit.collider.gameObject;
-                    Debug.Log(reachableObject.name);
+                    //Debug.Log(reachableObject.name);
                 }
                 //if you interact with a new object
                 else if (reachableObject != hit.collider.gameObject)
                 {
                     reachableObject = hit.collider.gameObject;
-                    Debug.Log(reachableObject.name);
+                    //Debug.Log(reachableObject.name);
                 }
             }
             //if not interacting with anything then set reachable_object to null
@@ -98,7 +102,6 @@ public class Player : MonoBehaviour
         {
             meeleTime -= 1;
         }
-
         return;
     }
 
@@ -113,26 +116,24 @@ public class Player : MonoBehaviour
             move = false;
 
             //gets's mouse input
-            movex = Input.GetAxis("Mouse X");
-            movey = -Input.GetAxis("Mouse Y");
+            moveX = Input.GetAxis("Mouse X");
+            moveY = -Input.GetAxis("Mouse Y");
 
             //rotates player
-            if (movex != 0)
+            if (moveX != 0)
             {
                 //rotates player (left/right)
-                transform.Rotate(0, movex, 0);
+                transform.Rotate(0, moveX, 0);
                 move = true;
             }
 
             //moves camera's y-axis and ray_position
-            if (movey != 0)
+            if (moveY != 0)
             {
                 //rotates camera's (up/down)
-                camFirst.transform.Rotate(movey, 0, 0);
-
-                camThird.transform.Rotate(movey, 0, 0);
-
-                rayPosition.transform.Rotate(movey, 0, 0);
+                camFirst.transform.Rotate(moveY, 0, 0);
+                camThird.transform.Rotate(moveY, 0, 0);
+                rayPosition.transform.Rotate(moveY, 0, 0);
 
                 if (move == false)
                 {
@@ -145,7 +146,13 @@ public class Player : MonoBehaviour
                 //if  object is a harvestable resource (tree, rock, etc.) then mine (move to melee later)
                 if (reachableObject != null && reachableObject.tag.CompareTo("harvestable") == 0)
                 {
-                    
+                    //accesses script in parent
+                    reachableObject.transform.parent.GetComponent<Resource>().HitResource();
+
+                    //adds resource to inventory
+                    InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
+
+                    //Destroy(reachableObject);
                 }
             }
             //move forward
@@ -236,7 +243,7 @@ public class Player : MonoBehaviour
             {
                 if (jumped == false)
                 {
-                    playerR.AddForce(Vector3.up * 250);
+                    playerR.AddForce(Vector3.up * 7000);
                     jumped = true;
                 }
             }
@@ -383,23 +390,27 @@ public class Player : MonoBehaviour
     }
 
     //adds item to inventory
-    private void InventoryAdd( string item)
+    private void InventoryAdd(string item)
     {
+        Debug.Log("InventoryAdd called with item = " + item);
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
         bool slotFound = false;
 
-        for (byte i = 0; i < inventorySlot.Length ; i++)
+        for (byte i = 0; i < inventorySlot.Length; i++)
         {
+            
             //finds first open slot and marks
             if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
             {
+                Debug.Log("First free slot = " + i);
                 firstFreeSlot = (sbyte)i;
             }
 
             //add to existing slot
             else if (inventorySlot[i].CompareTo(item) == 0 && inventorySize[i] != 100)
             {
+                Debug.Log("Existing item: " + item);
                 slotFound = true;
                 inventorySize[i]++;
                 InventoryUpdate(i);
@@ -409,6 +420,7 @@ public class Player : MonoBehaviour
         //if item isn't in inventory and inventory isn't full
         if (slotFound == false && firstFreeSlot != -1)
         {
+            Debug.Log("New item: " + item);
             inventorySlot[firstFreeSlot] = item;
             inventorySize[firstFreeSlot]++;
             InventoryUpdate((byte)firstFreeSlot);
@@ -450,9 +462,8 @@ public class Player : MonoBehaviour
         {
             if (slotSelected != -1 && inventorySize[slotSelected] > 0)
             {
-                GameObject item = (GameObject)(Resources.Load("Prefabs/" + inventorySlot[slotSelected]));
-                Debug.Log("Item's name =" + item.name);
-                Instantiate(item, GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
+                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/" + inventorySlot[slotSelected]))), GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
+                item.name = inventorySlot[slotSelected];
                 inventorySize[slotSelected]--;
                 InventoryUpdate((byte)slotSelected);
             }
@@ -494,7 +505,6 @@ public class Player : MonoBehaviour
     //Loads objects and save file (if present)
     private void LoadGame()
     {
-
         //cursor
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
@@ -522,39 +532,32 @@ public class Player : MonoBehaviour
         playerSlot3.enabled = false;
         playerDrop.gameObject.SetActive(false);
 
-        //Loads previous save (if it exists
-        string destination = "Assets/Resources/save.txt";
-        FileStream file = null;
-
-        //if file exists then load
-        if (File.Exists(destination))
-        {
-            //get file
-            file = File.OpenRead(destination);
-            StreamReader read = new StreamReader(file);
-
-            //gets line from file
-            string line = read.ReadLine();
-
-            //player position
-            string[] playerData = line.Split(',');
-            Vector3 playerPOS = new Vector3(float.Parse(playerData[0]), float.Parse(playerData[1]), float.Parse(playerData[2]));
-            gameObject.transform.SetPositionAndRotation(playerPOS, Quaternion.Euler(0, 0, 0));
-
-            file.Close();
-        }
-
         //settings before game starts (change later when saving is implemented)
         camThird.gameObject.SetActive(false);
         playerR.GetComponent<MeshRenderer>().enabled = false;
         Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
 
-        //fill inventorySlot with -1's for default and inventory Size with 0
-        for (byte i=0; i < inventorySlot.Length; i++)
+       
+        //fill inventorySlot with "" for default names and inventory Size with 0
+        for (byte i = 0; i < inventorySlot.Length; i++)
         {
             inventorySlot[i] = "";
             inventorySize[i] = 0;
         }
-        return;
+        return;     
+    }
+
+    //gets rescouce for harvestable resource
+    private string GetHarvestableResource(string name)
+    {
+        string resource = "";
+
+        //tree
+        if (name.CompareTo("tree") == 0)
+        {
+            resource = "wood";
+        }
+
+        return resource;
     }
 }

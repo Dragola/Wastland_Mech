@@ -13,10 +13,9 @@ GameObject:
   - component: {fileID: 4994200967218374594}
   - component: {fileID: 4994200967218374595}
   - component: {fileID: 54157966912967644}
-  - component: {fileID: 1197534431}
   m_Layer: 0
   m_Name: wood
-  m_TagString: Untagged
+  m_TagString: resource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 1
@@ -109,16 +108,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
---- !u!114 &1197534431
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4994200967218374620}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9019d7992bc1b4499436cc30329ed0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  health: 0
