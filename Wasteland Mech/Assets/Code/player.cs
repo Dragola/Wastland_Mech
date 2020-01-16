@@ -352,39 +352,106 @@ public class Player : MonoBehaviour
     {
         if (slot == 0)
         {
-            //enables button if inventory slot has item
-            if (playerSlot0.enabled == false)
+            //if slot has item
+            if (inventorySize[0] > 0)
             {
-                playerSlot0.enabled = true;
+                //enables button if inventory slot has item
+                if (playerSlot0.enabled == false)
+                {
+                    playerSlot0.enabled = true;
+                }
+                //update slot
+                playerSlot0.GetComponentInChildren<Text>().text = "" + inventorySlot[0] + "x" + inventorySize[0];
             }
-            playerSlot0.GetComponentInChildren<Text>().text = "" + inventorySlot[0] + "x" + inventorySize[0];
+            else
+            {
+                //enables button if inventory slot has item
+                if (playerSlot0.enabled == true)
+                {
+                    playerSlot0.enabled = false;
+                }
+
+                inventorySlot[0] = "";
+                //update slot
+                playerSlot0.GetComponentInChildren<Text>().text = "";
+
+            }
+            
         }
         else if (slot == 1)
         {
-            //enables button if inventory slot has item
-            if (playerSlot1.enabled == false)
+            //if slot has item
+            if (inventorySize[1] > 0)
             {
-                playerSlot1.enabled = true;
+                //enables button if inventory slot has item
+                if (playerSlot1.enabled == false)
+                {
+                    playerSlot1.enabled = true;
+                }
+                //update slots text with item and amount
+                playerSlot1.GetComponentInChildren<Text>().text = "" + inventorySlot[1] + "x" + inventorySize[1];
             }
-            playerSlot1.GetComponentInChildren<Text>().text = "" + inventorySlot[1] + "x" + inventorySize[1];
+            else
+            {
+                //enables button if inventory slot has item
+                if (playerSlot1.enabled == true)
+                {
+                    playerSlot1.enabled = false;
+                }
+                inventorySlot[1] = "";
+                //update slots text with item and amount
+                playerSlot1.GetComponentInChildren<Text>().text = "";
+            }
         }
         else if (slot == 2)
         {
-            //enables button if inventory slot has item
-            if (playerSlot2.enabled == false)
+            //if slot has item
+            if (inventorySize[2] > 0)
             {
-                playerSlot2.enabled = true;
+                //enables button if inventory slot has item
+                if (playerSlot2.enabled == false)
+                {
+                    playerSlot2.enabled = true;
+                }
+                //update slots text with item and amount
+                playerSlot2.GetComponentInChildren<Text>().text = "" + inventorySlot[2] + "x" + inventorySize[2];
             }
-            playerSlot2.GetComponentInChildren<Text>().text = "" + inventorySlot[2] + "x" + inventorySize[2];
+            else
+            {
+                //enables button if inventory slot has item
+                if (playerSlot2.enabled == true)
+                {
+                    playerSlot2.enabled = false;
+                }
+                inventorySlot[2] = "";
+                //update slots text with item and amount
+                playerSlot2.GetComponentInChildren<Text>().text = "";
+            }
         }
         else if (slot == 3)
         {
-            //enables button if inventory slot has item
-            if (playerSlot3.enabled == false)
+            //if slot has item
+            if (inventorySize[3] > 0)
             {
-                playerSlot3.enabled = true;
+                //enables button if inventory slot has item
+                if (playerSlot3.enabled == false)
+                {
+                    playerSlot3.enabled = true;
+                }
+                //update slots text with item and amount
+                playerSlot3.GetComponentInChildren<Text>().text = "" + inventorySlot[3] + "x" + inventorySize[3];
             }
-            playerSlot3.GetComponentInChildren<Text>().text = "" + inventorySlot[3] + "x" + inventorySize[3];
+            else
+            {
+                //enables button if inventory slot has item
+                if (playerSlot3.enabled == true)
+                {
+                    playerSlot3.enabled = false;
+                }
+                inventorySlot[3] = "";
+                //update slots text with item and amount
+                playerSlot3.GetComponentInChildren<Text>().text = "";
+            }
         }
         return;
     }
@@ -465,7 +532,7 @@ public class Player : MonoBehaviour
                 GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/" + inventorySlot[slotSelected]))), GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
                 item.name = inventorySlot[slotSelected];
                 inventorySize[slotSelected]--;
-                InventoryUpdate((byte)slotSelected);
+                InventoryUpdate((byte)slotSelected);   
             }
         }
     }
