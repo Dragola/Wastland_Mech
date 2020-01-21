@@ -36,13 +36,12 @@ public class Player : MonoBehaviour
     //bool aim = false;
 
     //enable and updating
-    private byte update_UI = 0; //if UI needs to update
     private bool enableMovement = true; //enables the player to move and interact
     private bool enableInventory = false;
 
     //inventory
     private GameObject reachableObject = null;
-    public string[] inventorySlot;
+    public string[] inventorySlot = new string[4];
     public byte[] inventorySize;
     public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
     public bool inventoryKeyHit = false;
