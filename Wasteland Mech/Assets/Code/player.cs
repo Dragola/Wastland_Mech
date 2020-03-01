@@ -17,6 +17,7 @@ public class Player : MonoBehaviour
     private bool jumped = false;
     private GameObject rayPosition = null;
     private bool move = false;
+    public byte harvestRate = 1;
 
     //camera's
     private Camera camFirst;
@@ -40,20 +41,23 @@ public class Player : MonoBehaviour
     private bool enableInventory = false;
 
     //inventory
-    private GameObject reachableObject = null;
-    public string[] inventorySlot = new string[4];
-    public byte[] inventorySize;
-    public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
+    public GameObject reachableObject = null;
+    public string[] inventorySlot = null;
+    public byte[] inventorySize = null;
+    //public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
     public bool inventoryKeyHit = false;
     public sbyte slotSelected = -1;
 
+    //runs before awake
+    private void Awake()
+    {
+        //have to size arrays after initialization
+        inventorySlot = new string[4];
+        inventorySize = new byte[4];
+    }
     // Use this for initialization
     void Start()
     {
-        //have to size arrays after initialization vs during.
-        inventorySlot = new string[4];
-        inventorySize = new byte[4];
-
         //loads previous save (if any) and sets everything up
         LoadGame();
     }
@@ -142,16 +146,32 @@ public class Player : MonoBehaviour
             //melee detection
             if (Input.GetMouseButtonDown(0))
             {
-                //if  object is a harvestable resource (tree, rock, etc.) then mine (move to melee later)
-                if (reachableObject != null && reachableObject.tag.CompareTo("harvestable") == 0)
+                //if an object is reachable
+                if (reachableObject != null)
                 {
-                    //accesses script in parent
-                    reachableObject.transform.parent.GetComponent<Resource>().HitResource();
+                    //if object is a harvestable resource (tree, rock, etc.) then mine/harvest (add tool requirements later)
+                    if (reachableObject.tag.CompareTo("harvestable") == 0)
+                    {
+                        //check there is room in inventory
+                        if (OpenInventorySlot(GetHarvestableResource(reachableObject.transform.parent.name)))
+                        {
+                            //accesses resource script to subtract health
+                            reachableObject.transform.parent.GetComponent<Resource>().HitResource(harvestRate);
 
-                    //adds resource to inventory
-                    InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
-
-                    //Destroy(reachableObject);
+                            //multiple recource collection by harvest rate
+                            for (byte i = 0; i < harvestRate; i++)
+                            {
+                                //adds resource to inventory
+                                InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
+                            }
+                        }
+                        //no room for resource
+                        else
+                        {
+                            Debug.Log("Not room for resource");
+                        }
+                    }
+                    
                 }
             }
             //move forward
@@ -232,9 +252,18 @@ public class Player : MonoBehaviour
                 //if object can be picked up (resource/item)
                 if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
                 {
-                    InventoryAdd(reachableObject.name);
-                    Destroy(reachableObject);
-                    reachableObject = null;
+                    //check if there is room in inventory
+                    if (OpenInventorySlot(reachableObject.name))
+                    {
+                        InventoryAdd(reachableObject.name);
+                        Destroy(reachableObject);
+                        reachableObject = null;
+                    }
+                    //no room for resource
+                    else
+                    {
+                        Debug.Log("Not room for resource");
+                    }
                 }
             }
             //jumping
@@ -273,11 +302,13 @@ public class Player : MonoBehaviour
                 if (Time.timeScale == 10)
                 {
                     Time.timeScale = 1;
+                    harvestRate = 1;
                     Debug.Log("Speed normal");
                 }
                 else
                 {
                     Time.timeScale = 10;
+                    harvestRate = 5;
                     Debug.Log("Speed up");
                 }
 
@@ -458,7 +489,7 @@ public class Player : MonoBehaviour
     //adds item to inventory
     private void InventoryAdd(string item)
     {
-        Debug.Log("InventoryAdd called with item = " + item);
+        //Debug.Log("InventoryAdd called with item = " + item);
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
         bool slotFound = false;
@@ -469,14 +500,14 @@ public class Player : MonoBehaviour
             //finds first open slot and marks
             if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
             {
-                Debug.Log("First free slot = " + i);
+                //Debug.Log("First free slot = " + i);
                 firstFreeSlot = (sbyte)i;
             }
 
             //add to existing slot
             else if (inventorySlot[i].CompareTo(item) == 0 && inventorySize[i] != 100)
             {
-                Debug.Log("Existing item: " + item);
+                //Debug.Log("Existing item: " + item);
                 slotFound = true;
                 inventorySize[i]++;
                 InventoryUpdate(i);
@@ -486,7 +517,7 @@ public class Player : MonoBehaviour
         //if item isn't in inventory and inventory isn't full
         if (slotFound == false && firstFreeSlot != -1)
         {
-            Debug.Log("New item: " + item);
+            //Debug.Log("New item: " + item);
             inventorySlot[firstFreeSlot] = item;
             inventorySize[firstFreeSlot]++;
             InventoryUpdate((byte)firstFreeSlot);
@@ -613,7 +644,7 @@ public class Player : MonoBehaviour
         return;     
     }
 
-    //gets rescouce for harvestable resource
+    //gets rescouce type for harvestable resource
     private string GetHarvestableResource(string name)
     {
         string resource = "";
@@ -623,7 +654,34 @@ public class Player : MonoBehaviour
         {
             resource = "wood";
         }
-
+        //rock
+        else if (name.CompareTo("largeRock") == 0)
+        {
+            resource = "rock";
+        }
+        //metal
+        else if (name.CompareTo("scrap") == 0)
+        {
+            resource = "metal";
+        } 
         return resource;
+    }
+    //check if player can collect resource (inventory is full)
+    private bool OpenInventorySlot(string resource)
+    {
+        //Debug.Log("Running Openinventory Slot");
+        bool isOpen = false;
+        //Debug.Log("Resource to chekc for: " + resource);
+        //check slots
+        for (byte i=0; i< inventorySize.Length; i++)
+        {
+            //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
+            if(inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
+            {
+                isOpen = true;
+                //Debug.Log("Slot " + i + "is open/has room.");
+            }
+        }
+        return isOpen;
     }
 }
