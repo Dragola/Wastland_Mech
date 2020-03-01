@@ -9,18 +9,15 @@ public class Resource : MonoBehaviour
         if(this.gameObject.name == "tree")
         {
             health = 100;
-        }
-        else if (this.gameObject.name == "largeRock")
-        {
-            health = 255;
+
         }
     }
 
     //when resource is hit
-    public string HitResource(byte damage)
+    public string HitResource()
     {
         //decrease resource health
-        this.health -= damage;
+        this.health--;
 
         //if gameobject has been fully harvested
         if(this.health <= 0)
