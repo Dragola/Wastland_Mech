@@ -34,7 +34,5 @@ public class World : MonoBehaviour
     void FixedUpdate()
     {
         dayDuration -= 1;
-    }
+    } 
 }
-
-       

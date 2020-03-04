@@ -660,10 +660,10 @@ public class Player : MonoBehaviour
             resource = "rock";
         }
         //metal
-        else if (name.CompareTo("scrap") == 0)
+        else if (name.CompareTo("rustedMetal") == 0)
         {
-            resource = "metal";
-        } 
+            resource = "scrap";
+        }
         return resource;
     }
     //check if player can collect resource (inventory is full)
