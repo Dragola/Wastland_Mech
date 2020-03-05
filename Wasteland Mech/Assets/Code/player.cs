@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     private Button playerSlot2 = null;
     private Button playerSlot3 = null;
     public Button playerDrop = null;
+    private Text playerInteractText = null;
 
     //bool aim = false;
 
@@ -58,8 +59,48 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        //loads previous save (if any) and sets everything up
-        LoadGame();
+        //cursor
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
+
+        //scripts
+        scriptW = GameObject.Find("world").GetComponent<World>();
+
+        //player
+        playerR = GetComponent<Rigidbody>();
+        rayPosition = GameObject.Find("rayPosition");
+
+        //camera's
+        camFirst = GameObject.Find("cameraFP").GetComponent<Camera>();
+        camThird = GameObject.Find("cameraTP").GetComponent<Camera>();
+
+        //inventory
+        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Button>();
+        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Button>();
+        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
+        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
+        playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
+        playerInteractText = GameObject.Find("playerInteractText").GetComponent<Text>();
+        playerSlot0.enabled = false;
+        playerSlot1.enabled = false;
+        playerSlot2.enabled = false;
+        playerSlot3.enabled = false;
+        playerDrop.gameObject.SetActive(false);
+
+        //settings before game starts (change later when saving is implemented)
+        camThird.gameObject.SetActive(false);
+        playerR.GetComponent<MeshRenderer>().enabled = false;
+        Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
+
+        //fill inventorySlot with "" for default names and inventory Size with 0
+        for (byte i = 0; i < inventorySlot.Length; i++)
+        {
+            inventorySlot[i] = "";
+            inventorySize[i] = 0;
+        }
+
+        //loads data from save-WIP
+        //LoadGame();
     }
     //updates once per frame
     void Update()
@@ -84,6 +125,8 @@ public class Player : MonoBehaviour
                 if (reachableObject == null)
                 {
                     reachableObject = hit.collider.gameObject;
+                    //update interation text
+
                     //Debug.Log(reachableObject.name);
                 }
                 //if you interact with a new object
@@ -92,13 +135,37 @@ public class Player : MonoBehaviour
                     reachableObject = hit.collider.gameObject;
                     //Debug.Log(reachableObject.name);
                 }
+                if (reachableObject.tag.CompareTo("harvestable") == 0 && playerInteractText.text.CompareTo("harvestable") != 0)
+                {
+                    //update interation text for harvestable object
+                    UpdateInteractionText("Press m1 to mine " + reachableObject.transform.parent.name);
+                }
+                else if ((reachableObject.tag.CompareTo("item") == 0 || reachableObject.tag.CompareTo("resource") == 0) && (playerInteractText.text.CompareTo("item") != 0 || playerInteractText.text.CompareTo("resource") != 0))
+                {
+                    //update interation text for item/resource
+                    UpdateInteractionText("Press e to pickup " + reachableObject.name);
+                }
+                else
+                {
+                    //update interation text to nothing (can't interact with it)
+                    UpdateInteractionText("");
+                }
             }
             //if not interacting with anything then set reachable_object to null
             else
             {
                 reachableObject = null;
+                
+                //change text if not blank already
+                if (playerInteractText.text.CompareTo("") != 0)
+                {
+                    //update interation text to nothing (can't interact with it)
+                    UpdateInteractionText("");
+                }
             }
+            return;
         }
+
         //meele
         //melee timer
         if (meele == true)
@@ -252,6 +319,9 @@ public class Player : MonoBehaviour
                 //if object can be picked up (resource/item)
                 if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
                 {
+                    //update interation text to nothing (object is picked up)
+                    UpdateInteractionText("");
+
                     //check if there is room in inventory
                     if (OpenInventorySlot(reachableObject.name))
                     {
@@ -262,7 +332,7 @@ public class Player : MonoBehaviour
                     //no room for resource
                     else
                     {
-                        Debug.Log("Not room for resource");
+                        Debug.Log("No room for resource");
                     }
                 }
             }
@@ -347,6 +417,44 @@ public class Player : MonoBehaviour
         }
         return;
     }
+    
+
+    //------------------------------------------------------------------------------------Load && Save Game-WIP
+    private void SaveGame()
+    {
+        //path to the File
+        string destination = "Assets/Resources/save.txt";
+        FileStream file = null;
+
+        //Checks if file exists and pulls it, othwerwise creates a new file 
+        if (File.Exists(destination))
+        {
+            file = File.OpenWrite(destination);
+        }
+        else
+        {
+            file = File.Create(destination);
+        }
+        //File writer
+        StreamWriter write = new StreamWriter(file);
+
+        //adds the player position to be written (Queue's it)
+        write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
+
+        //pushes the output to the File
+        write.Flush();
+
+        //closes File
+        file.Close();
+
+        return;
+    }
+    
+    //Loads objects and save file (if present)
+    private void LoadGame()
+    {    
+        return;     
+    }
     //------------------------------------------------------------------------------------Inventory
     //the invenetory method (interacting, opening and closing)
     private void Inventory(bool status)
@@ -360,7 +468,7 @@ public class Player : MonoBehaviour
                 inventoryKeyHit = true;
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
-                
+
             }
             //closes inventory(resets variables and hides buttons) and re-enables movement
             else if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
@@ -404,9 +512,8 @@ public class Player : MonoBehaviour
                 inventorySlot[0] = "";
                 //update slot
                 playerSlot0.GetComponentInChildren<Text>().text = "";
-
             }
-            
+
         }
         else if (slot == 1)
         {
@@ -496,7 +603,7 @@ public class Player : MonoBehaviour
 
         for (byte i = 0; i < inventorySlot.Length; i++)
         {
-            
+
             //finds first open slot and marks
             if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
             {
@@ -559,91 +666,13 @@ public class Player : MonoBehaviour
         {
             if (slotSelected != -1 && inventorySize[slotSelected] > 0)
             {
-                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/" + inventorySlot[slotSelected]))), GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
+                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventorySlot[slotSelected]))), GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
                 item.name = inventorySlot[slotSelected];
                 inventorySize[slotSelected]--;
-                InventoryUpdate((byte)slotSelected);   
+                InventoryUpdate((byte)slotSelected);
             }
         }
     }
-
-    //------------------------------------------------------------------------------------Load && Save Game
-    //Saves the game (WIP)
-    private void SaveGame()
-    {
-        //path to the File
-        string destination = "Assets/Resources/save.txt";
-        FileStream file = null;
-
-        //Checks if file exists and pulls it, othwerwise creates a new file 
-        if (File.Exists(destination))
-        {
-            file = File.OpenWrite(destination);
-        }
-        else
-        {
-            file = File.Create(destination);
-        }
-        //File writer
-        StreamWriter write = new StreamWriter(file);
-
-        //adds the player position to be written (Queue's it)
-        write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
-
-        //pushes the output to the File
-        write.Flush();
-
-        //closes File
-        file.Close();
-
-        return;
-    }
-    
-    //Loads objects and save file (if present)
-    private void LoadGame()
-    {
-        //cursor
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
-
-        //scripts
-        scriptW = GameObject.Find("world").GetComponent<World>();
-
-        //player
-        playerR = GetComponent<Rigidbody>();
-        rayPosition = GameObject.Find("rayPosition");
-
-        //camera's
-        camFirst = GameObject.Find("cameraFP").GetComponent<Camera>();
-        camThird = GameObject.Find("cameraTP").GetComponent<Camera>();
-
-        //inventory
-        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Button>();
-        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Button>();
-        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
-        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
-        playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
-        playerSlot0.enabled = false;
-        playerSlot1.enabled = false;
-        playerSlot2.enabled = false;
-        playerSlot3.enabled = false;
-        playerDrop.gameObject.SetActive(false);
-
-        //settings before game starts (change later when saving is implemented)
-        camThird.gameObject.SetActive(false);
-        playerR.GetComponent<MeshRenderer>().enabled = false;
-        Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
-
-       
-        //fill inventorySlot with "" for default names and inventory Size with 0
-        for (byte i = 0; i < inventorySlot.Length; i++)
-        {
-            inventorySlot[i] = "";
-            inventorySize[i] = 0;
-        }
-        return;     
-    }
-
     //gets rescouce type for harvestable resource
     private string GetHarvestableResource(string name)
     {
@@ -683,5 +712,9 @@ public class Player : MonoBehaviour
             }
         }
         return isOpen;
+    }
+    private void UpdateInteractionText(string text)
+    {
+        playerInteractText.text = text;
     }
 }

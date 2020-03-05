@@ -40,7 +40,6 @@ public class Resource : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
-
         return this.name;
     }
 }
