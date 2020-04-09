@@ -25,9 +25,9 @@ public class Player : MonoBehaviour
     private bool firstPersonCamera = true;
 
     //UI components
-    //private Text player_Health = null;
-    //private Text player_Food = null;
-    //private Text player_Water = null;
+    //private Text playerHealth = null;
+    //private Text playerFood = null;
+    //private Text playerWater = null;
     private Button playerSlot0 = null;
     private Button playerSlot1 = null;
     private Button playerSlot2 = null;
@@ -37,15 +37,14 @@ public class Player : MonoBehaviour
 
     //bool aim = false;
 
-    //enable and updating
-    private bool enableMovement = true; //enables the player to move and interact
+    //movement and inventory
+    private bool enableMovement = true;
     private bool enableInventory = false;
 
     //inventory
     public GameObject reachableObject = null;
     public string[] inventorySlot = null;
     public byte[] inventorySize = null;
-    //public string[] HARVESTABLE = { "Tree", "Rock", "Metal Sheet"};
     public bool inventoryKeyHit = false;
     public sbyte slotSelected = -1;
 
@@ -113,7 +112,7 @@ public class Player : MonoBehaviour
 
     }
 
-    //------------------------------------------------------------------------------------Physics and constants
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
     void FixedUpdate()
     {
         if (move)
@@ -121,47 +120,24 @@ public class Player : MonoBehaviour
             //interaction
             if (Physics.Raycast(rayPosition.transform.position, rayPosition.transform.forward, out RaycastHit hit, (float)1.5))
             {
-                //if you interact with an object
+                //get interacted object if not already
                 if (reachableObject == null)
                 {
                     reachableObject = hit.collider.gameObject;
-                    //update interation text
-
-                    //Debug.Log(reachableObject.name);
                 }
-                //if you interact with a new object
+                //new interacted object
                 else if (reachableObject != hit.collider.gameObject)
                 {
                     reachableObject = hit.collider.gameObject;
-                    //Debug.Log(reachableObject.name);
                 }
-                if (reachableObject.tag.CompareTo("harvestable") == 0 && playerInteractText.text.CompareTo("harvestable") != 0)
-                {
-                    //update interation text for harvestable object
-                    UpdateInteractionText("Press m1 to mine " + reachableObject.transform.parent.name);
-                }
-                else if ((reachableObject.tag.CompareTo("item") == 0 || reachableObject.tag.CompareTo("resource") == 0) && (playerInteractText.text.CompareTo("item") != 0 || playerInteractText.text.CompareTo("resource") != 0))
-                {
-                    //update interation text for item/resource
-                    UpdateInteractionText("Press e to pickup " + reachableObject.name);
-                }
-                else
-                {
-                    //update interation text to nothing (can't interact with it)
-                    UpdateInteractionText("");
-                }
+                UpdateInteractionText();
             }
             //if not interacting with anything then set reachable_object to null
             else
             {
                 reachableObject = null;
-                
-                //change text if not blank already
-                if (playerInteractText.text.CompareTo("") != 0)
-                {
-                    //update interation text to nothing (can't interact with it)
-                    UpdateInteractionText("");
-                }
+
+                UpdateInteractionText();
             }
             return;
         }
@@ -174,8 +150,7 @@ public class Player : MonoBehaviour
         }
         return;
     }
-
-    //------------------------------------------------------------------------------------Movement
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement
     //player movement and interaction
     public bool Movement(bool status)
     {
@@ -319,15 +294,13 @@ public class Player : MonoBehaviour
                 //if object can be picked up (resource/item)
                 if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
                 {
-                    //update interation text to nothing (object is picked up)
-                    UpdateInteractionText("");
-
                     //check if there is room in inventory
                     if (OpenInventorySlot(reachableObject.name))
                     {
                         InventoryAdd(reachableObject.name);
                         Destroy(reachableObject);
                         reachableObject = null;
+                        UpdateInteractionText();
                     }
                     //no room for resource
                     else
@@ -417,9 +390,7 @@ public class Player : MonoBehaviour
         }
         return;
     }
-    
-
-    //------------------------------------------------------------------------------------Load && Save Game-WIP
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Load && Save Game-WIP
     private void SaveGame()
     {
         //path to the File
@@ -450,12 +421,12 @@ public class Player : MonoBehaviour
         return;
     }
     
-    //Loads objects and save file (if present)
     private void LoadGame()
     {    
         return;     
     }
-    //------------------------------------------------------------------------------------Inventory
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
+
     //the invenetory method (interacting, opening and closing)
     private void Inventory(bool status)
     {
@@ -673,6 +644,7 @@ public class Player : MonoBehaviour
             }
         }
     }
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Resource type
     //gets rescouce type for harvestable resource
     private string GetHarvestableResource(string name)
     {
@@ -695,6 +667,7 @@ public class Player : MonoBehaviour
         }
         return resource;
     }
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Space
     //check if player can collect resource (inventory is full)
     private bool OpenInventorySlot(string resource)
     {
@@ -713,8 +686,39 @@ public class Player : MonoBehaviour
         }
         return isOpen;
     }
-    private void UpdateInteractionText(string text)
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
+    //updates text to indicate how to interact/use
+    private void UpdateInteractionText()
     {
-        playerInteractText.text = text;
+        string text = "";
+
+        //if there is a object
+        if (reachableObject != null)
+        {
+            
+            //if object is harvestable
+            if (reachableObject.tag.CompareTo("harvestable") == 0 && playerInteractText.text.CompareTo("harvestable") != 0)
+            {
+                //update interation text for harvestable object
+                text = "Press m1 to mine " + reachableObject.transform.parent.name;
+            }
+            //if objecct is resource or item
+            else if (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0)
+            {
+                //update interation text for item/resource
+                text = "Press e to pickup " + reachableObject.name;
+            }
+            //if object is for crafting
+            else if (reachableObject.tag.CompareTo("crafting") == 0)
+            {
+                //update interation text for item/resource
+                text = "Press e to access " + reachableObject.transform.parent.name;
+            }
+        }
+        //only update text if it's different
+        if (playerInteractText.text.CompareTo(text) != 0)
+        {
+            playerInteractText.text = text;
+        }
     }
 }
