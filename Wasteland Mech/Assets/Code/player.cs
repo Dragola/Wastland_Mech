@@ -11,35 +11,36 @@ public class Player : MonoBehaviour
     //player
     public float moveX = 0;
     public float moveY = 0;
-    private Rigidbody playerR = null;
-    public int meeleTime = 15;
-    bool meele = false;
+    private Rigidbody playerRigidbody = null;
+    public float meeleTime = 3;
+    public bool meele = false;
     private bool jumped = false;
-    private GameObject rayPosition = null;
+    private GameObject playerRaycastPoint = null;
     private bool move = false;
     public byte harvestRate = 1;
 
     //camera's
-    private Camera camFirst;
-    private Camera camThird;
+    private Camera playerCamera;
     private bool firstPersonCamera = true;
 
     //UI components
-    //private Text playerHealth = null;
-    //private Text playerFood = null;
-    //private Text playerWater = null;
+    private Text playerHealth = null;
+    private Text playerFood = null;
+    private Text playerWater = null;
     private Button playerSlot0 = null;
     private Button playerSlot1 = null;
     private Button playerSlot2 = null;
     private Button playerSlot3 = null;
     public Button playerDrop = null;
     private Text playerInteractText = null;
+    private Text playerModeText = null;
 
     //bool aim = false;
 
     //movement and inventory
     private bool enableMovement = true;
     private bool enableInventory = false;
+    private bool enableBuild = false;
 
     //inventory
     public GameObject reachableObject = null;
@@ -66,30 +67,28 @@ public class Player : MonoBehaviour
         scriptW = GameObject.Find("world").GetComponent<World>();
 
         //player
-        playerR = GetComponent<Rigidbody>();
-        rayPosition = GameObject.Find("rayPosition");
+        playerRigidbody = GameObject.Find("player").GetComponent<Rigidbody>();
+        playerRaycastPoint = GameObject.Find("playerRaycastPoint");
 
         //camera's
-        camFirst = GameObject.Find("cameraFP").GetComponent<Camera>();
-        camThird = GameObject.Find("cameraTP").GetComponent<Camera>();
+        playerCamera = GameObject.Find("playerCamera").GetComponent<Camera>();
 
-        //inventory
+        //UI
+        playerHealth = GameObject.Find("playerHealth").GetComponent<Text>();
+        playerFood = GameObject.Find("playerFood").GetComponent<Text>();
+        playerWater = GameObject.Find("playerWater").GetComponent<Text>();
         playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Button>();
         playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Button>();
         playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
         playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
         playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
         playerInteractText = GameObject.Find("playerInteractText").GetComponent<Text>();
+        playerModeText = GameObject.Find("playerModeText").GetComponent<Text>();
         playerSlot0.enabled = false;
         playerSlot1.enabled = false;
         playerSlot2.enabled = false;
         playerSlot3.enabled = false;
         playerDrop.gameObject.SetActive(false);
-
-        //settings before game starts (change later when saving is implemented)
-        camThird.gameObject.SetActive(false);
-        playerR.GetComponent<MeshRenderer>().enabled = false;
-        Application.targetFrameRate = 60; //should create or find a method that keeps everything running at certain rate (Time.deltatime?) to not limit FPS
 
         //fill inventorySlot with "" for default names and inventory Size with 0
         for (byte i = 0; i < inventorySlot.Length; i++)
@@ -110,15 +109,30 @@ public class Player : MonoBehaviour
         //Inventory
         Inventory(enableInventory);
 
+        //building
+        Building(enableBuild);
+
+        //melee timer
+        if (meele == true && meeleTime > 0)
+        {
+            meeleTime -= Time.deltaTime;
+        }
+        //reset meele
+        else if (meeleTime <= 0)
+        {
+            meele = false;
+            meeleTime = 3;
+        }
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
     void FixedUpdate()
     {
+        //if player moved
         if (move)
         {
             //interaction
-            if (Physics.Raycast(rayPosition.transform.position, rayPosition.transform.forward, out RaycastHit hit, (float)1.5))
+            if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, (float)1.5))
             {
                 //get interacted object if not already
                 if (reachableObject == null)
@@ -141,16 +155,9 @@ public class Player : MonoBehaviour
             }
             return;
         }
-
-        //meele
-        //melee timer
-        if (meele == true)
-        {
-            meeleTime -= 1;
-        }
         return;
     }
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
     //player movement and interaction
     public bool Movement(bool status)
     {
@@ -176,9 +183,8 @@ public class Player : MonoBehaviour
             if (moveY != 0)
             {
                 //rotates camera's (up/down)
-                camFirst.transform.Rotate(moveY, 0, 0);
-                camThird.transform.Rotate(moveY, 0, 0);
-                rayPosition.transform.Rotate(moveY, 0, 0);
+                playerCamera.transform.Rotate(moveY, 0, 0);
+                playerRaycastPoint.transform.Rotate(moveY, 0, 0);
 
                 if (move == false)
                 {
@@ -213,7 +219,10 @@ public class Player : MonoBehaviour
                             Debug.Log("Not room for resource");
                         }
                     }
-                    
+                }
+                else
+                {
+                    meele = true;
                 }
             }
             //move forward
@@ -309,12 +318,29 @@ public class Player : MonoBehaviour
                     }
                 }
             }
+            //building
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                //enables build mode
+                if (enableBuild == false)
+                {
+                    Debug.Log("Build mode enabled");
+                    enableBuild = true;
+                }
+                //disables build mode
+                else
+                {
+                    Debug.Log("Build mode disabled");
+                    enableBuild = false;
+                }
+            }
             //jumping
             if (Input.GetKey(KeyCode.Space))
             {
                 if (jumped == false)
                 {
-                    playerR.AddForce(Vector3.up * 7000);
+                    playerRigidbody.AddForce(Vector3.up * 7000);
+
                     jumped = true;
                 }
             }
@@ -326,17 +352,13 @@ public class Player : MonoBehaviour
             //first person
             if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
             {
-                playerR.GetComponent<MeshRenderer>().enabled = false;
-                camThird.gameObject.SetActive(false);
-                camFirst.gameObject.SetActive(true);
+                //playerRigidbody.GetComponent<MeshRenderer>().enabled = false;
                 firstPersonCamera = true;
             }
             //third person 
             else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
             {
-                playerR.GetComponent<MeshRenderer>().enabled = true;
-                camFirst.gameObject.SetActive(false);
-                camThird.gameObject.SetActive(true);
+                //playerRigidbody.GetComponent<MeshRenderer>().enabled = true;
                 firstPersonCamera = false;
             }
             //speed up
@@ -360,12 +382,11 @@ public class Player : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.I))
             {
                 enableInventory = true;
-                enableMovement = false;
             }
             //quits game
-            if (Input.GetKeyDown(KeyCode.L))
+            if (Input.GetKeyDown(KeyCode.Escape) && enableBuild == false && enableInventory == false)
             {
-                SaveGame();
+                //SaveGame();
                 Application.Quit();
             }
 
@@ -390,7 +411,7 @@ public class Player : MonoBehaviour
         }
         return;
     }
-    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Load && Save Game-WIP
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Load && Save Game-WIP
     private void SaveGame()
     {
         //path to the File
@@ -425,7 +446,7 @@ public class Player : MonoBehaviour
     {    
         return;     
     }
-    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
 
     //the invenetory method (interacting, opening and closing)
     private void Inventory(bool status)
@@ -439,14 +460,12 @@ public class Player : MonoBehaviour
                 inventoryKeyHit = true;
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
-
             }
             //closes inventory(resets variables and hides buttons) and re-enables movement
             else if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
             {
                 playerDrop.gameObject.SetActive(false);
                 slotSelected = -1;
-                enableMovement = true;
                 enableInventory = false;
                 inventoryKeyHit = false;
                 Cursor.visible = false;
@@ -644,7 +663,7 @@ public class Player : MonoBehaviour
             }
         }
     }
-    //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Resource type
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Resource type
     //gets rescouce type for harvestable resource
     private string GetHarvestableResource(string name)
     {
@@ -667,7 +686,7 @@ public class Player : MonoBehaviour
         }
         return resource;
     }
-    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Space
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Space
     //check if player can collect resource (inventory is full)
     private bool OpenInventorySlot(string resource)
     {
@@ -686,7 +705,7 @@ public class Player : MonoBehaviour
         }
         return isOpen;
     }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
     //updates text to indicate how to interact/use
     private void UpdateInteractionText()
     {
@@ -720,5 +739,10 @@ public class Player : MonoBehaviour
         {
             playerInteractText.text = text;
         }
+    }
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Building
+    private void Building(bool status)
+    {
+
     }
 }
