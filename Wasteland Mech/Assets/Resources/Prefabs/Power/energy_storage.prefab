@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33812714909654772}
   - component: {fileID: 65183684081884144}
   - component: {fileID: 23838588338754884}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: EStorage
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,7 +102,7 @@ GameObject:
   - component: {fileID: 4401536405576150}
   - component: {fileID: 5243188468618920459}
   - component: {fileID: 1283682502008478219}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: energy_storage
   m_TagString: Untagged
   m_Icon: {fileID: 0}

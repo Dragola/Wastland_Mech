@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4072120405682550}
   - component: {fileID: 33030925861503184}
   - component: {fileID: 23327771565295540}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: PipeL
   m_TagString: IgnoreRay
   m_Icon: {fileID: 0}
@@ -88,7 +88,7 @@ GameObject:
   - component: {fileID: 4988326836981102}
   - component: {fileID: 198574266437202764}
   - component: {fileID: 199971763120674608}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Particle System (PipeL)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4716,7 +4716,7 @@ ParticleSystem:
 --- !u!199 &199971763120674608
 ParticleSystemRenderer:
   serializedVersion: 6
-  m_ObjectHideFlags: 2
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -4786,7 +4786,7 @@ GameObject:
   - component: {fileID: 4971925012808670}
   - component: {fileID: 198048167008036628}
   - component: {fileID: 199571421254764352}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Particle System (PipeR)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9414,7 +9414,7 @@ ParticleSystem:
 --- !u!199 &199571421254764352
 ParticleSystemRenderer:
   serializedVersion: 6
-  m_ObjectHideFlags: 2
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -9484,7 +9484,7 @@ GameObject:
   - component: {fileID: 4077125047294790}
   - component: {fileID: 33120834930025528}
   - component: {fileID: 23600182119127994}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: PipeR
   m_TagString: IgnoreRay
   m_Icon: {fileID: 0}
@@ -9561,7 +9561,7 @@ GameObject:
   - component: {fileID: 4668245884859856}
   - component: {fileID: 5604332461129452558}
   - component: {fileID: 6818037672439176454}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: generator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9628,7 +9628,7 @@ GameObject:
   - component: {fileID: 33774319633668036}
   - component: {fileID: 65031219034840828}
   - component: {fileID: 23259743215065408}
-  m_Layer: 2
+  m_Layer: 0
   m_Name: Main
   m_TagString: IgnoreRay
   m_Icon: {fileID: 0}

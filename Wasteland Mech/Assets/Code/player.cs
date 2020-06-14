@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
     public byte harvestRate = 1;
     public byte buildingSelected = 0;
     public GameObject buildingGameObject = null;
+    private GameObject playerDropSpot = null;
 
     //camera's
     private Camera playerCamera;
@@ -71,6 +72,7 @@ public class Player : MonoBehaviour
         //player
         playerRigidbody = GameObject.Find("player").GetComponent<Rigidbody>();
         playerRaycastPoint = GameObject.Find("playerRaycastPoint");
+        playerDropSpot = GameObject.Find("playerDropSpot");
 
         //camera's
         playerCamera = GameObject.Find("playerCamera").GetComponent<Camera>();
@@ -138,12 +140,7 @@ public class Player : MonoBehaviour
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
     void FixedUpdate()
     {
-        //if player moved
-        if (move)
-        {
-            
-        }
-        return;
+        
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
     //player movement and interaction
@@ -369,7 +366,7 @@ public class Player : MonoBehaviour
             Application.Quit();
         }
 
-        //raycast for interaction
+        //raycast for interaction (disabled if in build mode)
         if (move && enableBuild == false)
         {
             //interaction
@@ -657,7 +654,7 @@ public class Player : MonoBehaviour
         {
             if (slotSelected != -1 && inventorySize[slotSelected] > 0)
             {
-                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventorySlot[slotSelected]))), GameObject.Find("playerDropSpot").GetComponent<Transform>().position, Quaternion.identity.normalized);
+                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventorySlot[slotSelected]))), playerDropSpot.transform.position, Quaternion.identity.normalized);
                 item.name = inventorySlot[slotSelected];
                 inventorySize[slotSelected]--;
                 InventoryUpdate((byte)slotSelected);
@@ -757,17 +754,37 @@ public class Player : MonoBehaviour
             enableBuild = false;
             Destroy(buildingGameObject);
             buildingGameObject = null;
+            buildingSelected = 0;
         }
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
         {
             buildingGameObject = null;
+
+            //increase count in world script
+            if (buildingSelected == 1)
+            {
+                scriptW.addSolar();
+            }
         }
         //select solar panel- test (will be changed)
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             buildingSelected = 1;
-        } 
+        }
+
+        //if position isn't zero and a building is selected then spawn
+        if (buildingSelected > 0 && buildingGameObject == null)
+        {
+            //solar panel - test
+            if (buildingSelected == 1)
+            {
+                //spawns building, finds it, then removes (Clone) from name
+                Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
+                buildingGameObject = GameObject.Find("solar_panel(Clone)");
+                buildingGameObject.name = "solar_panel" + scriptW.getSolarCount();
+            }
+        }
         //if player moved
         if (move)
         {
@@ -781,18 +798,19 @@ public class Player : MonoBehaviour
                     buildingGameObject.transform.position = hit.point;
                 }
             }
-            //if position isn't zero and a building is selected then spawn
-            if (buildingSelected > 0 && buildingGameObject == null)
+        }
+
+        //if building is spawned enabled rotation
+        if (buildingGameObject != null)
+        {
+            if (Input.GetKey(KeyCode.Q))
             {
-                //solar panel - test
-                if(buildingSelected == 1)
-                {
-                    //spawns building, finds it, then removes (Clone) from name
-                    Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0,-1000, 0), Quaternion.identity);
-                    buildingGameObject = GameObject.Find("solar_panel(Clone)");
-                    buildingGameObject.name = "solar_panel";
-                }
-            }   
+                buildingGameObject.transform.Rotate(0, 1, 0);
+            }
+            else if (Input.GetKey(KeyCode.E))
+            {
+                buildingGameObject.transform.Rotate(0, -1, 0);
+            }
         }
         return;
     }
