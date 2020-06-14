@@ -12,12 +12,14 @@ public class Player : MonoBehaviour
     public float moveX = 0;
     public float moveY = 0;
     private Rigidbody playerRigidbody = null;
-    public float meeleTime = 3;
-    public bool meele = false;
+    public float meleeTime = 3;
+    public bool melee = false;
     private bool jumped = false;
     private GameObject playerRaycastPoint = null;
     private bool move = false;
     public byte harvestRate = 1;
+    public byte buildingSelected = 0;
+    public GameObject buildingGameObject = null;
 
     //camera's
     private Camera playerCamera;
@@ -41,12 +43,12 @@ public class Player : MonoBehaviour
     private bool enableMovement = true;
     private bool enableInventory = false;
     private bool enableBuild = false;
+    public bool methodKeyHit = false;
 
     //inventory
     public GameObject reachableObject = null;
     public string[] inventorySlot = null;
     public byte[] inventorySize = null;
-    public bool inventoryKeyHit = false;
     public sbyte slotSelected = -1;
 
     //runs before awake
@@ -103,25 +105,33 @@ public class Player : MonoBehaviour
     //updates once per frame
     void Update()
     {
-        //player movement
-        Movement(enableMovement);
-
+        //Movement
+        if (enableMovement)
+        {
+            Movement();
+        }
         //Inventory
-        Inventory(enableInventory);
-
-        //building
-        Building(enableBuild);
+        else if (enableInventory)
+        {
+            Inventory();
+        }
+        //Building
+        if (enableBuild)
+        {
+           
+            Building();
+        }
 
         //melee timer
-        if (meele == true && meeleTime > 0)
+        if (melee == true && meleeTime > 0)
         {
-            meeleTime -= Time.deltaTime;
+            meleeTime -= Time.deltaTime;
         }
         //reset meele
-        else if (meeleTime <= 0)
+        else if (meleeTime <= 0)
         {
-            meele = false;
-            meeleTime = 3;
+            melee = false;
+            meleeTime = 3;
         }
     }
 
@@ -130,6 +140,237 @@ public class Player : MonoBehaviour
     {
         //if player moved
         if (move)
+        {
+            
+        }
+        return;
+    }
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
+    //player movement and interaction
+    public void Movement()
+    {
+        //resets move detected
+        move = false;
+
+        //gets's mouse input
+        moveX = Input.GetAxis("Mouse X");
+        moveY = -Input.GetAxis("Mouse Y");
+
+        //rotates player
+        if (moveX != 0)
+        {
+            //rotates player (left/right)
+            transform.Rotate(0, moveX, 0);
+            move = true;
+        }
+
+        //moves camera's y-axis and ray_position
+        if (moveY != 0)
+        {
+            //rotates camera's (up/down)
+            playerCamera.transform.Rotate(moveY, 0, 0);
+            playerRaycastPoint.transform.Rotate(moveY, 0, 0);
+
+            if (move == false)
+            {
+                move = true;
+            }
+        }
+        //melee/interaction
+        if (Input.GetMouseButtonDown(0))
+        {
+            //if an object is reachable
+            if (reachableObject != null)
+            {
+                //if object is a harvestable resource (tree, rock, etc.) then mine/harvest (add tool requirements later)
+                if (reachableObject.tag.CompareTo("harvestable") == 0)
+                {
+                    //check there is room in inventory
+                    if (OpenInventorySlot(GetHarvestableResource(reachableObject.transform.parent.name)))
+                    {
+                        //accesses resource script to subtract health
+                        reachableObject.transform.parent.GetComponent<Resource>().HitResource(harvestRate);
+
+                        //multiple recource collection by harvest rate
+                        for (byte i = 0; i < harvestRate; i++)
+                        {
+                            //adds resource to inventory
+                            InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
+                        }
+                    }
+                    //no room for resource
+                    else
+                    {
+                        Debug.Log("Not room for resource");
+                    }
+                }
+            }
+            //if no reachable object then still perform melee
+            else
+            {
+                melee = true;
+            }
+        }
+        //move forward
+        if (Input.GetKey(KeyCode.W))
+        {
+            //running
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                transform.Translate(0, 0, 4 * Time.deltaTime);
+            }
+            //walk
+            else
+            {
+                transform.Translate(0, 0, 2 * Time.deltaTime);
+            }
+            if (move == false)
+            {
+                move = true;
+            }
+        }
+        //move back
+        if (Input.GetKey(KeyCode.S))
+        {
+            //running
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                transform.Translate(0, 0, -4 * Time.deltaTime);
+            }
+            //walk
+            else
+            {
+                transform.Translate(0, 0, -2 * Time.deltaTime);
+            }
+            if (move == false)
+            {
+                move = true;
+            }
+        }
+        //move left
+        if (Input.GetKey(KeyCode.A))
+        {
+            //running
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                transform.Translate(-4 * Time.deltaTime, 0, 0);
+            }
+            //walk
+            else
+            {
+                transform.Translate(-2 * Time.deltaTime, 0, 0);
+            }
+            if (move == false)
+            {
+                move = true;
+            }
+        }
+        //move right
+        if (Input.GetKey(KeyCode.D))
+        {
+            //running
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                transform.Translate(4 * Time.deltaTime, 0, 0);
+            }
+            //walk
+            else
+            {
+                transform.Translate(2 * Time.deltaTime, 0, 0);
+            }
+            if (move == false)
+            {
+                move = true;
+            }
+        }
+        //interact
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            //if object can be picked up (resource/item)
+            if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
+            {
+                //check if there is room in inventory
+                if (OpenInventorySlot(reachableObject.name))
+                {
+                    InventoryAdd(reachableObject.name);
+                    Destroy(reachableObject);
+                    reachableObject = null;
+                    UpdateInteractionText();
+                }
+                //no room for resource
+                else
+                {
+                    Debug.Log("No room for resource");
+                }
+            }
+        }
+        //building
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            //enables build mode
+            if (enableBuild == false)
+            {
+                Debug.Log("Build mode enabled");
+                enableBuild = true;
+            }
+        }
+        //jumping
+        if (Input.GetKey(KeyCode.Space))
+        {
+            if (jumped == false)
+            {
+                playerRigidbody.AddForce(Vector3.up * 7000);
+                jumped = true;
+            }
+        }
+        //aim
+        if (Input.GetMouseButtonDown(1))
+        {
+            Debug.Log("Aim not implemented yet :(");
+        }
+        //first person
+        if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
+        {
+            //playerRigidbody.GetComponent<MeshRenderer>().enabled = false;
+            firstPersonCamera = true;
+        }
+        //third person 
+        else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
+        {
+            //playerRigidbody.GetComponent<MeshRenderer>().enabled = true;
+            firstPersonCamera = false;
+        }
+        //speed up
+        if (Input.GetKeyDown(KeyCode.KeypadPlus))
+        {
+            if (Time.timeScale == 10)
+            {
+                Time.timeScale = 1;
+                harvestRate = 1;
+                Debug.Log("Speed normal");
+            }
+            else
+            {
+                Time.timeScale = 10;
+                harvestRate = 5;
+                Debug.Log("Speed up");
+            }
+        }
+        //open inventory
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            enableMovement = false;
+            enableInventory = true; 
+        }
+        //quits game
+        if (Input.GetKeyDown(KeyCode.Escape) && enableBuild == false && enableInventory == false)
+        {
+            //SaveGame();
+            Application.Quit();
+        }
+
+        //raycast for interaction
+        if (move && enableBuild == false)
         {
             //interaction
             if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, (float)1.5))
@@ -156,242 +397,6 @@ public class Player : MonoBehaviour
             return;
         }
         return;
-    }
-    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
-    //player movement and interaction
-    public bool Movement(bool status)
-    {
-        //if movement is enabled 
-        if (status)
-        {
-            //resets move detected
-            move = false;
-
-            //gets's mouse input
-            moveX = Input.GetAxis("Mouse X");
-            moveY = -Input.GetAxis("Mouse Y");
-
-            //rotates player
-            if (moveX != 0)
-            {
-                //rotates player (left/right)
-                transform.Rotate(0, moveX, 0);
-                move = true;
-            }
-
-            //moves camera's y-axis and ray_position
-            if (moveY != 0)
-            {
-                //rotates camera's (up/down)
-                playerCamera.transform.Rotate(moveY, 0, 0);
-                playerRaycastPoint.transform.Rotate(moveY, 0, 0);
-
-                if (move == false)
-                {
-                    move = true;
-                }
-            }
-            //melee detection
-            if (Input.GetMouseButtonDown(0))
-            {
-                //if an object is reachable
-                if (reachableObject != null)
-                {
-                    //if object is a harvestable resource (tree, rock, etc.) then mine/harvest (add tool requirements later)
-                    if (reachableObject.tag.CompareTo("harvestable") == 0)
-                    {
-                        //check there is room in inventory
-                        if (OpenInventorySlot(GetHarvestableResource(reachableObject.transform.parent.name)))
-                        {
-                            //accesses resource script to subtract health
-                            reachableObject.transform.parent.GetComponent<Resource>().HitResource(harvestRate);
-
-                            //multiple recource collection by harvest rate
-                            for (byte i = 0; i < harvestRate; i++)
-                            {
-                                //adds resource to inventory
-                                InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
-                            }
-                        }
-                        //no room for resource
-                        else
-                        {
-                            Debug.Log("Not room for resource");
-                        }
-                    }
-                }
-                else
-                {
-                    meele = true;
-                }
-            }
-            //move forward
-            if (Input.GetKey(KeyCode.W))
-            {
-                //running
-                if (Input.GetKey(KeyCode.LeftShift))
-                {
-                    transform.Translate(0, 0, 4 * Time.deltaTime);
-                }
-                //walk
-                else
-                {
-                    transform.Translate(0, 0, 2 * Time.deltaTime);
-                }
-                if (move == false)
-                {
-                    move = true;
-                }
-            }
-            //move back
-            if (Input.GetKey(KeyCode.S))
-            {
-                //running
-                if (Input.GetKey(KeyCode.LeftShift))
-                {
-                    transform.Translate(0, 0, -4 * Time.deltaTime);
-                }
-                //walk
-                else
-                {
-                    transform.Translate(0, 0, -2 * Time.deltaTime);
-                }
-                if (move == false)
-                {
-                    move = true;
-                }
-            }
-            //move left
-            if (Input.GetKey(KeyCode.A))
-            {
-                //running
-                if (Input.GetKey(KeyCode.LeftShift))
-                {
-                    transform.Translate(-4 * Time.deltaTime, 0, 0);
-                }
-                //walk
-                else
-                {
-                    transform.Translate(-2 * Time.deltaTime, 0, 0);
-                }
-                if (move == false)
-                {
-                    move = true;
-                }
-            }
-            //move right
-            if (Input.GetKey(KeyCode.D))
-            {
-                //running
-                if (Input.GetKey(KeyCode.LeftShift))
-                {
-                    transform.Translate(4 * Time.deltaTime, 0, 0);
-                }
-                //walk
-                else
-                {
-                    transform.Translate(2 * Time.deltaTime, 0, 0);
-                }
-                if (move == false)
-                {
-                    move = true;
-                }
-            }
-            //interact
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                //if object can be picked up (resource/item)
-                if (reachableObject != null && (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0))
-                {
-                    //check if there is room in inventory
-                    if (OpenInventorySlot(reachableObject.name))
-                    {
-                        InventoryAdd(reachableObject.name);
-                        Destroy(reachableObject);
-                        reachableObject = null;
-                        UpdateInteractionText();
-                    }
-                    //no room for resource
-                    else
-                    {
-                        Debug.Log("No room for resource");
-                    }
-                }
-            }
-            //building
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                //enables build mode
-                if (enableBuild == false)
-                {
-                    Debug.Log("Build mode enabled");
-                    enableBuild = true;
-                }
-                //disables build mode
-                else
-                {
-                    Debug.Log("Build mode disabled");
-                    enableBuild = false;
-                }
-            }
-            //jumping
-            if (Input.GetKey(KeyCode.Space))
-            {
-                if (jumped == false)
-                {
-                    playerRigidbody.AddForce(Vector3.up * 7000);
-
-                    jumped = true;
-                }
-            }
-            //aim
-            if (Input.GetMouseButtonDown(1))
-            {
-                Debug.Log("Aim not implemented yet :(");
-            }
-            //first person
-            if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
-            {
-                //playerRigidbody.GetComponent<MeshRenderer>().enabled = false;
-                firstPersonCamera = true;
-            }
-            //third person 
-            else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
-            {
-                //playerRigidbody.GetComponent<MeshRenderer>().enabled = true;
-                firstPersonCamera = false;
-            }
-            //speed up
-            if (Input.GetKeyDown(KeyCode.KeypadPlus))
-            {
-                if (Time.timeScale == 10)
-                {
-                    Time.timeScale = 1;
-                    harvestRate = 1;
-                    Debug.Log("Speed normal");
-                }
-                else
-                {
-                    Time.timeScale = 10;
-                    harvestRate = 5;
-                    Debug.Log("Speed up");
-                }
-
-            }
-            //open inventory
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                enableInventory = true;
-            }
-            //quits game
-            if (Input.GetKeyDown(KeyCode.Escape) && enableBuild == false && enableInventory == false)
-            {
-                //SaveGame();
-                Application.Quit();
-            }
-
-        }
-        return false;
     }
 
     //collision detection
@@ -447,30 +452,26 @@ public class Player : MonoBehaviour
         return;     
     }
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
-
-    //the invenetory method (interacting, opening and closing)
-    private void Inventory(bool status)
+    //invenetory method
+    private void Inventory()
     {
-        //if inventory is enabled
-        if (status)
+        //detects when inventory key is released (prevents opening and closing at same time)
+        if (Input.GetKeyUp(KeyCode.I) && methodKeyHit == false)
         {
-            //detects when inventory key is released (prevents opening and closing at same time)
-            if (Input.GetKeyUp(KeyCode.I) && inventoryKeyHit == false)
-            {
-                inventoryKeyHit = true;
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-            }
-            //closes inventory(resets variables and hides buttons) and re-enables movement
-            else if (Input.GetKeyDown(KeyCode.Escape) && inventoryKeyHit || Input.GetKeyDown(KeyCode.I) && inventoryKeyHit)
-            {
-                playerDrop.gameObject.SetActive(false);
-                slotSelected = -1;
-                enableInventory = false;
-                inventoryKeyHit = false;
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
-            }
+            methodKeyHit = true;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        //closes inventory(resets variables and hides buttons) and re-enables movement
+        else if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit || Input.GetKeyDown(KeyCode.I) && methodKeyHit)
+        {
+            playerDrop.gameObject.SetActive(false);
+            slotSelected = -1;
+            methodKeyHit = false;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            enableInventory = false;
+            enableMovement = true;
         }
         return;
     }
@@ -741,8 +742,58 @@ public class Player : MonoBehaviour
         }
     }
     //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Building
-    private void Building(bool status)
+    //building method
+    private void Building()
     {
-
+        //indicate build mode was enabled (prevent instant disabling)
+        if (Input.GetKeyUp(KeyCode.B) && methodKeyHit == false)
+        {
+            methodKeyHit = true;
+        }
+        //disables build mode (and destroys structure so not left in world)
+        else if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit || Input.GetKeyDown(KeyCode.B) && methodKeyHit)
+        {
+            methodKeyHit = false;
+            enableBuild = false;
+            Destroy(buildingGameObject);
+            buildingGameObject = null;
+        }
+        //place building
+        if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            buildingGameObject = null;
+        }
+        //select solar panel- test (will be changed)
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            buildingSelected = 1;
+        } 
+        //if player moved
+        if (move)
+        {
+            //raycast for building's spot
+            if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, 10))
+            {
+                //if a building has been picked
+                if (buildingGameObject != null)
+                {
+                    //set building position
+                    buildingGameObject.transform.position = hit.point;
+                }
+            }
+            //if position isn't zero and a building is selected then spawn
+            if (buildingSelected > 0 && buildingGameObject == null)
+            {
+                //solar panel - test
+                if(buildingSelected == 1)
+                {
+                    //spawns building, finds it, then removes (Clone) from name
+                    Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0,-1000, 0), Quaternion.identity);
+                    buildingGameObject = GameObject.Find("solar_panel(Clone)");
+                    buildingGameObject.name = "solar_panel";
+                }
+            }   
+        }
+        return;
     }
 }

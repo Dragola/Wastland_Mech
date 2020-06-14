@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 626737784438983247}
   - component: {fileID: 500545330497751640}
   - component: {fileID: 1440594690291497271}
-  - component: {fileID: 1506248410740401507}
   - component: {fileID: 4940164439338005934}
+  - component: {fileID: 2777695547215319102}
   m_Layer: 0
   m_Name: scrap
   m_TagString: resource
@@ -79,19 +79,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!65 &1506248410740401507
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4940164439338005921}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.0000001, y: 2, z: 1.0000002}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4940164439338005934
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -108,3 +95,17 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!64 &2777695547215319102
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4940164439338005921}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Convex: 1
+  m_CookingOptions: -1
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
