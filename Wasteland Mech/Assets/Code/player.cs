@@ -759,15 +759,25 @@ public class Player : MonoBehaviour
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
         {
-            buildingGameObject = null;
+            //add power script- may be a way to add script to prefab
+            buildingGameObject.AddComponent<Power>();
+
+            //set layers for object- raycast can hit
+            buildingGameObject.layer = 0;
+            foreach (Transform child in buildingGameObject.transform)
+            {
+                child.gameObject.layer = 0;
+            }
 
             //increase count in world script
             if (buildingSelected == 1)
             {
-                scriptW.addSolar();
+                scriptW.addSolar(buildingGameObject);
             }
+
+            buildingGameObject = null;
         }
-        //select solar panel- test (will be changed)
+        //select solar panel
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             buildingSelected = 1;
@@ -783,6 +793,13 @@ public class Player : MonoBehaviour
                 Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject = GameObject.Find("solar_panel(Clone)");
                 buildingGameObject.name = "solar_panel" + scriptW.getSolarCount();
+
+                //set layers for object- ignores raycast so doesn't hit its self
+                buildingGameObject.layer = 2;
+                foreach (Transform child in buildingGameObject.transform)
+                {
+                    child.gameObject.layer = 2;
+                }
             }
         }
         //if player moved
