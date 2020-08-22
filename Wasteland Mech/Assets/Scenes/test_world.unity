@@ -1088,6 +1088,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   solarCount: 0
+  solarPanels: []
+  solarEnabled: 0
   dayDuration: 3600
 --- !u!1001 &1969372507
 PrefabInstance:

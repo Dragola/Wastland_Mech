@@ -759,9 +759,16 @@ public class Player : MonoBehaviour
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
         {
-            //add power script- may be a way to add script to prefab
-            buildingGameObject.AddComponent<Power>();
-
+            if (buildingSelected == 1)
+            {
+                //add power script- may be a way to add script to prefab for blender model
+                buildingGameObject.AddComponent<SolarPower>();
+            }
+            else if (buildingSelected == 2)
+            {
+                //add power script- may be a way to add script to prefab for blender model
+                buildingGameObject.AddComponent<GeneratorPower>();
+            }
             //set layers for object- raycast can hit
             buildingGameObject.layer = 0;
             foreach (Transform child in buildingGameObject.transform)
@@ -769,12 +776,10 @@ public class Player : MonoBehaviour
                 child.gameObject.layer = 0;
             }
 
-            //increase count in world script
-            if (buildingSelected == 1)
-            {
-                scriptW.addSolar(buildingGameObject);
-            }
-
+            //add powerSource to list
+            scriptW.addPowerSource(buildingGameObject);
+            
+            //null refernece so building stays in world
             buildingGameObject = null;
         }
         //select solar panel
@@ -782,39 +787,45 @@ public class Player : MonoBehaviour
         {
             buildingSelected = 1;
         }
+        //select generator
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            buildingSelected = 2;
+        }
 
         //if position isn't zero and a building is selected then spawn
         if (buildingSelected > 0 && buildingGameObject == null)
         {
-            //solar panel - test
+            //solar panel
             if (buildingSelected == 1)
             {
                 //spawns building, finds it, then removes (Clone) from name
-                Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
-                buildingGameObject = GameObject.Find("solar_panel(Clone)");
+                buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "solar_panel" + scriptW.getSolarCount();
+            }
+            //generator
+            else if (buildingSelected == 2)
+            {
+                //spawns building, finds it, then removes (Clone) from name
+                buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/generator") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
+                buildingGameObject.name = "generator" + scriptW.getSolarCount();
+            }
+            //sets the buildingObject as a child of world
+            buildingGameObject.transform.parent = GameObject.Find("world").transform;
 
-                //set layers for object- ignores raycast so doesn't hit its self
-                buildingGameObject.layer = 2;
-                foreach (Transform child in buildingGameObject.transform)
-                {
-                    child.gameObject.layer = 2;
-                }
+            //set layer for object (ignores raycast so doesn't hit its self)
+            buildingGameObject.layer = 2;
+            //set layer for each child object in building (ignores raycast so doesn't hit its self)
+            foreach (Transform child in buildingGameObject.transform)
+            {
+                child.gameObject.layer = 2;
             }
         }
-        //if player moved
-        if (move)
+        //if player moved and raycast hit then update (or move) building location
+        if (move && Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, 10) && buildingGameObject != null)
         {
-            //raycast for building's spot
-            if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, 10))
-            {
-                //if a building has been picked
-                if (buildingGameObject != null)
-                {
-                    //set building position
-                    buildingGameObject.transform.position = hit.point;
-                }
-            }
+            //set building position
+            buildingGameObject.transform.position = hit.point;
         }
 
         //if building is spawned enabled rotation

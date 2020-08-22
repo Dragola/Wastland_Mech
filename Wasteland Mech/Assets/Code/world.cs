@@ -5,7 +5,8 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
     public byte solarCount = 0;
-    public List<GameObject> solarPanels = new List<GameObject>();
+    public byte generatorCount = 0;
+    public List<GameObject> powerSources = new List<GameObject>();
     public bool solarEnabled = false;
     
     //world
@@ -26,12 +27,12 @@ public class World : MonoBehaviour
         if((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
         {
             solarEnabled = true;
-            generatorStatus();
+            powerStatusUpdate();
         }
         else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
         {
             solarEnabled = false;
-            generatorStatus();
+            powerStatusUpdate();
         }
         //sun rotation
         sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
@@ -53,19 +54,28 @@ public class World : MonoBehaviour
     }
 
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Solar Power
-    public void addSolar(GameObject solarPanel)
+    public void addPowerSource(GameObject powerSource)
     {
-        //increase solar count and add to list
-        solarCount++;
-        solarPanels.Add(solarPanel);
-        generatorStatus();
+        //increase solar count
+        if (powerSource.name.Contains("solar"))
+        {
+            solarCount++;
+        }
+        //increase generator count
+        else if (powerSource.name.Contains("generator"))
+        {        
+            generatorCount++;
+        }
+        //add powerSource to list and update generator status
+        powerSources.Add(powerSource);
+        powerStatusUpdate();
         return;
     }
-    public void removeSolar(GameObject solarPanel)
+    public void removePowerSource(GameObject solarPanel)
     {
         //decrease solar count and remove from list
         solarCount--;
-        solarPanels.Remove(solarPanel);
+        powerSources.Remove(solarPanel);
         return;
     }
 
@@ -74,12 +84,21 @@ public class World : MonoBehaviour
         return solarCount;
     }
 
-    public void generatorStatus()
+    public void powerStatusUpdate()
     {
-        foreach (GameObject solar in solarPanels)
+        foreach (GameObject powerSource in powerSources)
         {
-            solar.GetComponent<Power>().generatorStatus(solarEnabled);
-            Debug.Log("Enabled solar generation for: " + solar.name);
+            if (powerSource.name.Contains("solar"))
+            {
+                powerSource.GetComponent<SolarPower>().solarEnabled(solarEnabled);
+                //Debug.Log("Enabled solar generation for: " + powerSource.name);
+            }
+            else if (powerSource.name.Contains("generator"))
+            {
+                powerSource.GetComponent<GeneratorPower>().generatorEnabled(true);
+                //Debug.Log("Enabled solar generation for: " + powerSource.name);
+            }
+
         }
         return;
     }
