@@ -120,7 +120,6 @@ public class Player : MonoBehaviour
         //Building
         if (enableBuild)
         {
-           
             Building();
         }
 
@@ -176,6 +175,8 @@ public class Player : MonoBehaviour
         //melee/interaction
         if (Input.GetMouseButtonDown(0))
         {
+            melee = true;
+
             //if an object is reachable
             if (reachableObject != null)
             {
@@ -201,12 +202,7 @@ public class Player : MonoBehaviour
                         Debug.Log("Not room for resource");
                     }
                 }
-            }
-            //if no reachable object then still perform melee
-            else
-            {
-                melee = true;
-            }
+            }            
         }
         //move forward
         if (Input.GetKey(KeyCode.W))
@@ -280,7 +276,7 @@ public class Player : MonoBehaviour
                 move = true;
             }
         }
-        //interact
+        //interaction
         if (Input.GetKeyDown(KeyCode.E))
         {
             //if object can be picked up (resource/item)
@@ -301,7 +297,7 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        //building
+        //build mode
         if (Input.GetKeyDown(KeyCode.B))
         {
             //enables build mode
@@ -311,12 +307,12 @@ public class Player : MonoBehaviour
                 enableBuild = true;
             }
         }
-        //jumping
+        //jump
         if (Input.GetKey(KeyCode.Space))
         {
             if (jumped == false)
             {
-                playerRigidbody.AddForce(Vector3.up * 7000);
+                playerRigidbody.AddForce(Vector3.up * 8000);
                 jumped = true;
             }
         }
@@ -688,8 +684,7 @@ public class Player : MonoBehaviour
     //check if player can collect resource (inventory is full)
     private bool OpenInventorySlot(string resource)
     {
-        //Debug.Log("Running Openinventory Slot");
-        bool isOpen = false;
+        bool openSlot = false;
         //Debug.Log("Resource to chekc for: " + resource);
         //check slots
         for (byte i=0; i< inventorySize.Length; i++)
@@ -697,11 +692,10 @@ public class Player : MonoBehaviour
             //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
             if(inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
             {
-                isOpen = true;
-                //Debug.Log("Slot " + i + "is open/has room.");
+                openSlot = true;
             }
         }
-        return isOpen;
+        return openSlot;
     }
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
     //updates text to indicate how to interact/use
@@ -775,7 +769,6 @@ public class Player : MonoBehaviour
             {
                 child.gameObject.layer = 0;
             }
-
             //add powerSource to list
             scriptW.addPowerSource(buildingGameObject);
             
@@ -788,7 +781,6 @@ public class Player : MonoBehaviour
             //if not the same building then destroy and null for new one
             if (buildingSelected != 1)
             {
-                Debug.Log("Swap to solar (should destroy generator)");
                 Destroy(buildingGameObject);
                 buildingGameObject = null;
             }
@@ -800,7 +792,6 @@ public class Player : MonoBehaviour
             //if not the same building then destroy and null for new one
             if (buildingSelected != 2)
             {
-                Debug.Log("Swap to generator (should destroy solar)");
                 Destroy(buildingGameObject);
                 buildingGameObject = null;
             }
@@ -834,7 +825,6 @@ public class Player : MonoBehaviour
             {
                 child.gameObject.layer = 2;
             }
-
         }
         //if player moved and raycast hit then update (or move) building location
         if (move && Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, 10) && buildingGameObject != null)
