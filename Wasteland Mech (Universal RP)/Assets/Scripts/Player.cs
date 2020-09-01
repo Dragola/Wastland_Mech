@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
 using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
+
     //scripts
     private World scriptW = null;
 
@@ -86,8 +86,8 @@ public class Player : MonoBehaviour
         playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
         playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
         playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
-        playerInteractText = GameObject.Find("playerInteractText").GetComponent<Text>();
-        playerModeText = GameObject.Find("playerModeText").GetComponent<Text>();
+        playerInteractText = GameObject.Find("playerInteract").GetComponent<Text>();
+        playerModeText = GameObject.Find("playerMode").GetComponent<Text>();
         playerSlot0.enabled = false;
         playerSlot1.enabled = false;
         playerSlot2.enabled = false;
@@ -139,7 +139,7 @@ public class Player : MonoBehaviour
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
     void FixedUpdate()
     {
-        
+
     }
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
     //player movement and interaction
@@ -187,7 +187,7 @@ public class Player : MonoBehaviour
                     if (OpenInventorySlot(GetHarvestableResource(reachableObject.transform.parent.name)))
                     {
                         //accesses resource script to subtract health
-                        reachableObject.transform.parent.GetComponent<Resource>().HitResource(harvestRate);
+                        reachableObject.transform.parent.GetComponent<MinableResource>().HitResource(harvestRate);
 
                         //multiple recource collection by harvest rate
                         for (byte i = 0; i < harvestRate; i++)
@@ -202,7 +202,7 @@ public class Player : MonoBehaviour
                         Debug.Log("Not room for resource");
                     }
                 }
-            }            
+            }
         }
         //move forward
         if (Input.GetKey(KeyCode.W))
@@ -353,7 +353,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.I))
         {
             enableMovement = false;
-            enableInventory = true; 
+            enableInventory = true;
         }
         //quits game
         if (Input.GetKeyDown(KeyCode.Escape) && enableBuild == false && enableInventory == false)
@@ -386,8 +386,17 @@ public class Player : MonoBehaviour
                 reachableObject = null;
 
                 UpdateInteractionText();
-            }
-            return;
+            } 
+        }
+        //load game
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            scriptW.LoadGame();
+        }
+        //save game
+        else if (Input.GetKeyDown(KeyCode.O))
+        {
+            scriptW.SaveGame();
         }
         return;
     }
@@ -408,41 +417,6 @@ public class Player : MonoBehaviour
             }
         }
         return;
-    }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Load && Save Game-WIP
-    private void SaveGame()
-    {
-        //path to the File
-        string destination = "Assets/Resources/save.txt";
-        FileStream file = null;
-
-        //Checks if file exists and pulls it, othwerwise creates a new file 
-        if (File.Exists(destination))
-        {
-            file = File.OpenWrite(destination);
-        }
-        else
-        {
-            file = File.Create(destination);
-        }
-        //File writer
-        StreamWriter write = new StreamWriter(file);
-
-        //adds the player position to be written (Queue's it)
-        write.WriteLine("" + gameObject.transform.position.x + "," + gameObject.transform.position.y + "," + gameObject.transform.position.z);
-
-        //pushes the output to the File
-        write.Flush();
-
-        //closes File
-        file.Close();
-
-        return;
-    }
-    
-    private void LoadGame()
-    {    
-        return;     
     }
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
     //invenetory method
@@ -687,10 +661,10 @@ public class Player : MonoBehaviour
         bool openSlot = false;
         //Debug.Log("Resource to chekc for: " + resource);
         //check slots
-        for (byte i=0; i< inventorySize.Length; i++)
+        for (byte i = 0; i < inventorySize.Length; i++)
         {
             //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
-            if(inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
+            if (inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
             {
                 openSlot = true;
             }
@@ -706,7 +680,7 @@ public class Player : MonoBehaviour
         //if there is a object
         if (reachableObject != null)
         {
-            
+
             //if object is harvestable
             if (reachableObject.tag.CompareTo("harvestable") == 0 && playerInteractText.text.CompareTo("harvestable") != 0)
             {
@@ -740,6 +714,7 @@ public class Player : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.B) && methodKeyHit == false)
         {
             methodKeyHit = true;
+            playerModeText.text = "Press Esc or B to exit build mode";
         }
         //disables build mode (and destroys structure so not left in world)
         else if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit || Input.GetKeyDown(KeyCode.B) && methodKeyHit)
@@ -749,6 +724,7 @@ public class Player : MonoBehaviour
             Destroy(buildingGameObject);
             buildingGameObject = null;
             buildingSelected = 0;
+            playerModeText.text = "Press B to enter build mode";
         }
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
@@ -771,7 +747,7 @@ public class Player : MonoBehaviour
             }
             //add powerSource to list
             scriptW.addPowerSource(buildingGameObject);
-            
+
             //null refernece so building stays in world
             buildingGameObject = null;
         }
@@ -784,7 +760,7 @@ public class Player : MonoBehaviour
                 Destroy(buildingGameObject);
                 buildingGameObject = null;
             }
-            buildingSelected = 1;  
+            buildingSelected = 1;
         }
         //select generator
         else if (Input.GetKeyDown(KeyCode.Alpha2))

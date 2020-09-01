@@ -925,6 +925,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 645376229, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
+      propertyPath: m_Name
+      value: playerHealth
+      objectReference: {fileID: 0}
+    - target: {fileID: 1628346247, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
+      propertyPath: m_Name
+      value: playerMode
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786175051, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
+      propertyPath: m_Name
+      value: playerFood
+      objectReference: {fileID: 0}
+    - target: {fileID: 1966734163, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
+      propertyPath: m_Name
+      value: playerWater
+      objectReference: {fileID: 0}
     - target: {fileID: 1396268209906870, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
       propertyPath: m_Name
       value: player
@@ -987,6 +1003,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Direction
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4169191634296777163, guid: 346357f58d90c464f965b63a6e9214b7,
+        type: 3}
+      propertyPath: m_Name
+      value: playerInteract
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670023597930661370, guid: 346357f58d90c464f965b63a6e9214b7,
+        type: 3}
+      propertyPath: m_Name
+      value: playerUI
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}

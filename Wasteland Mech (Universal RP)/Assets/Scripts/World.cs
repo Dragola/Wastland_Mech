@@ -1,12 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+using UnityEngine.Playables;
 
 public class World : MonoBehaviour
 {
+    private GameObject player = null;
     public byte solarCount = 0;
     public byte generatorCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
+    public List<GameObject> resources = new List<GameObject>();
+    public List<GameObject> minableResources = new List<GameObject>();
     public bool solarEnabled = false;
     
     //world
@@ -18,6 +25,9 @@ public class World : MonoBehaviour
     {
         //sun
         sun = GameObject.Find("sun");
+
+        //player
+        player = GameObject.Find("player");
     }
 
     // Update is called once per frame (60fps = 60calls)
@@ -102,4 +112,86 @@ public class World : MonoBehaviour
         }
         return;
     }
+    public void SaveGame()
+    {
+        //save object
+        SaveData save = CreateSaveObject();
+        BinaryFormatter bf = new BinaryFormatter();
+
+        //file location + name
+        FileStream file = File.Create(Application.persistentDataPath + "/save.save");
+
+        //serilizes data and puts into file
+        bf.Serialize(file, save);
+
+        //closes file
+        file.Close();
+
+        Debug.Log("Game Saved");
+
+        return;
+    }
+
+    public void LoadGame()
+    {
+        //if there is a save file
+        if (File.Exists(Application.persistentDataPath + "/save.save"))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/save.save", FileMode.Open);
+            SaveData save = (SaveData)bf.Deserialize(file);
+            file.Close();
+
+            //loads values
+            //player position and rotation
+            player.transform.position = new Vector3(save.playerX, save.playerY, save.playerZ);
+            player.transform.rotation = new Quaternion(save.playerRX, save.playerRY, save.playerRZ, 1);
+            GameObject.Find("playerCamera").transform.rotation = new Quaternion(save.playerCameraRotation, 0, 0, 1);
+
+            solarCount = save.solarCount;
+            generatorCount = save.generatorCount;
+            
+            Debug.Log("Game Loaded");
+        }
+        //if there is not a save file
+        else
+        {
+            Debug.Log("No save file present");
+        }
+        return;
+    }
+    private SaveData CreateSaveObject()
+    {
+        SaveData save = new SaveData();
+
+        //player position
+        save.playerX = player.transform.position.x;
+        save.playerY = player.transform.position.y;
+        save.playerZ = player.transform.position.z;
+        save.playerRX = player.transform.rotation.x;
+        save.playerRY = player.transform.rotation.y;
+        save.playerRZ = player.transform.rotation.z;
+        save.playerCameraRotation = GameObject.Find("playerCamera").transform.rotation.x;
+
+        //solar and generator count
+        save.solarCount = solarCount;
+        save.generatorCount = generatorCount;
+
+        return save;
+    }
+}
+
+[Serializable]
+class SaveData
+{
+    public float playerX;
+    public float playerY;
+    public float playerZ;
+    public float playerRX;
+    public float playerRY;
+    public float playerRZ;
+    public float playerCameraRotation;
+
+    public byte solarCount;
+    public byte generatorCount;
 }

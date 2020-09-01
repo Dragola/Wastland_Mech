@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Resource : MonoBehaviour
+public class MinableResource : MonoBehaviour
 {
     public byte health = 0;
     // Start is called before the first frame update
