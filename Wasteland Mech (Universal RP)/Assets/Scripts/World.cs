@@ -4,7 +4,6 @@ using UnityEngine;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-using UnityEngine.Playables;
 
 public class World : MonoBehaviour
 {
@@ -15,6 +14,7 @@ public class World : MonoBehaviour
     public List<GameObject> resources = new List<GameObject>();
     public List<GameObject> minableResources = new List<GameObject>();
     public bool solarEnabled = false;
+    public bool paused = false;
     
     //world
     GameObject sun = null;
@@ -33,29 +33,32 @@ public class World : MonoBehaviour
     // Update is called once per frame (60fps = 60calls)
     void Update()
     {
-        //enable solar panels to generate
-        if((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
+        //if game isn't paused
+        if (paused == false)
         {
-            solarEnabled = true;
-            powerStatusUpdate();
-        }
-        else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
-        {
-            solarEnabled = false;
-            powerStatusUpdate();
-        }
-        //sun rotation
-        sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
+            //enable solar panels to generate
+            if ((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
+            {
+                solarEnabled = true;
+                powerStatusUpdate();
+            }
+            else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
+            {
+                solarEnabled = false;
+                powerStatusUpdate();
+            }
+            //sun rotation
+            sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
 
-        //clock
-        dayDuration -= Time.deltaTime;
+            //clock
+            dayDuration -= Time.deltaTime;
 
-        //reset clock/day
-        if(dayDuration <= 0)
-        {
-            dayDuration = 3600;
+            //reset clock/day
+            if (dayDuration <= 0)
+            {
+                dayDuration = 3600;
+            }
         }
-
     }
     //runs at fixed rate
     void FixedUpdate()
@@ -151,6 +154,11 @@ public class World : MonoBehaviour
             solarCount = save.solarCount;
             generatorCount = save.generatorCount;
             
+            //sun and time
+            sun.transform.position = new Vector3(save.sunX, save.sunY, save.sunZ);
+            sun.transform.rotation = new Quaternion(save.sunRX, 0, 0, 1);
+            dayDuration = save.time;
+            
             Debug.Log("Game Loaded");
         }
         //if there is not a save file
@@ -162,22 +170,39 @@ public class World : MonoBehaviour
     }
     private SaveData CreateSaveObject()
     {
-        SaveData save = new SaveData();
+        //didn't know you could do this...
+        SaveData save = new SaveData
+        {
+            //player position
+            playerX = player.transform.position.x,
+            playerY = player.transform.position.y,
+            playerZ = player.transform.position.z,
+            playerRX = player.transform.rotation.x,
+            playerRY = player.transform.rotation.y,
+            playerRZ = player.transform.rotation.z,
+            playerCameraRotation = GameObject.Find("playerCamera").transform.rotation.x,
 
-        //player position
-        save.playerX = player.transform.position.x;
-        save.playerY = player.transform.position.y;
-        save.playerZ = player.transform.position.z;
-        save.playerRX = player.transform.rotation.x;
-        save.playerRY = player.transform.rotation.y;
-        save.playerRZ = player.transform.rotation.z;
-        save.playerCameraRotation = GameObject.Find("playerCamera").transform.rotation.x;
+            //solar and generator count
+            solarCount = solarCount,
+            generatorCount = generatorCount,
 
-        //solar and generator count
-        save.solarCount = solarCount;
-        save.generatorCount = generatorCount;
+            //sun and time
+            sunX = sun.transform.position.x,
+            sunY = sun.transform.position.y,
+            sunZ = sun.transform.position.z,
+            sunRX = sun.transform.rotation.x,
+            time = dayDuration
+    };
 
         return save;
+    }
+    public void PauseWorld()
+    {
+        paused = true;
+    }
+    public void ResumeWorld()
+    {
+        paused = false;
     }
 }
 
@@ -194,4 +219,10 @@ class SaveData
 
     public byte solarCount;
     public byte generatorCount;
+
+    public float sunX;
+    public float sunY;
+    public float sunZ;
+    public float sunRX;
+    public float time;
 }

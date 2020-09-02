@@ -37,13 +37,16 @@ public class Player : MonoBehaviour
     public Button playerDrop = null;
     private Text playerInteractText = null;
     private Text playerModeText = null;
+    private Canvas playerInventoryUI = null;
+    private Canvas playerPauseMenuUI = null;
 
     //bool aim = false;
 
     //movement and inventory
-    private bool enableMovement = true;
-    private bool enableInventory = false;
-    private bool enableBuild = false;
+    public bool enableMovement = true;
+    public bool enableInventory = false;
+    public bool enablePause = false;
+    public bool enableBuild = false;
     public bool methodKeyHit = false;
 
     //inventory
@@ -88,10 +91,10 @@ public class Player : MonoBehaviour
         playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
         playerInteractText = GameObject.Find("playerInteract").GetComponent<Text>();
         playerModeText = GameObject.Find("playerMode").GetComponent<Text>();
-        playerSlot0.enabled = false;
-        playerSlot1.enabled = false;
-        playerSlot2.enabled = false;
-        playerSlot3.enabled = false;
+        playerInventoryUI = GameObject.Find("playerInventoryUI").GetComponent<Canvas>();
+        playerPauseMenuUI = GameObject.Find("playerPauseMenuUI").GetComponent<Canvas>();
+        playerInventoryUI.gameObject.SetActive(false);
+        playerPauseMenuUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
 
         //fill inventorySlot with "" for default names and inventory Size with 0
@@ -100,9 +103,6 @@ public class Player : MonoBehaviour
             inventorySlot[i] = "";
             inventorySize[i] = 0;
         }
-
-        //loads data from save-WIP
-        //LoadGame();
     }
     //updates once per frame
     void Update()
@@ -122,7 +122,11 @@ public class Player : MonoBehaviour
         {
             Building();
         }
-
+        //Paused
+        if (enablePause)
+        {
+            Paused();
+        }
         //melee timer
         if (melee == true && meleeTime > 0)
         {
@@ -355,11 +359,10 @@ public class Player : MonoBehaviour
             enableMovement = false;
             enableInventory = true;
         }
-        //quits game
+        //pauses game
         if (Input.GetKeyDown(KeyCode.Escape) && enableBuild == false && enableInventory == false)
         {
-            //SaveGame();
-            Application.Quit();
+            PauseGame();
         }
 
         //raycast for interaction (disabled if in build mode)
@@ -391,12 +394,12 @@ public class Player : MonoBehaviour
         //load game
         if (Input.GetKeyDown(KeyCode.L))
         {
-            scriptW.LoadGame();
+            LoadGame();
         }
         //save game
         else if (Input.GetKeyDown(KeyCode.O))
         {
-            scriptW.SaveGame();
+            SaveGame();
         }
         return;
     }
@@ -428,6 +431,7 @@ public class Player : MonoBehaviour
             methodKeyHit = true;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+            playerInventoryUI.gameObject.SetActive(true);
         }
         //closes inventory(resets variables and hides buttons) and re-enables movement
         else if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit || Input.GetKeyDown(KeyCode.I) && methodKeyHit)
@@ -439,6 +443,7 @@ public class Player : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             enableInventory = false;
             enableMovement = true;
+            playerInventoryUI.gameObject.SetActive(false);
         }
         return;
     }
@@ -820,6 +825,87 @@ public class Player : MonoBehaviour
             {
                 buildingGameObject.transform.Rotate(0, -1, 0);
             }
+        }
+        return;
+    }
+    public void QuitGame()
+    {
+        Debug.Log("QuitGame");
+        Application.Quit();
+        return;
+    }
+    public void LoadGame()
+    {
+        Debug.Log("LoadGame");
+        scriptW.LoadGame();
+        ResumeGame();
+        
+        return;
+    }
+    public void SaveGame()
+    {
+        Debug.Log("SaveGame");
+        scriptW.SaveGame();
+        return;
+    }
+    public void ResumeGame()
+    {
+        Debug.Log("ResumeGame");
+        //enables movement and disables pause
+        enableMovement = true;
+        enablePause = false;
+        methodKeyHit = false;
+
+        //set rigidbody constraints (disable position but re-freeze rotation)
+        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
+
+        //resume world
+        scriptW.ResumeWorld();
+
+        //hide and lock cursor
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+        
+        //diable UI
+        playerPauseMenuUI.gameObject.SetActive(false);
+        return;
+    }
+    public void PauseGame()
+    {
+        Debug.Log("PauseGame");
+
+        //disable movement and enable pause
+        enableMovement = false;
+        enablePause = true;
+        
+        //freeze rigidbody position (rotation is already frozen)
+        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
+
+        //pause world
+        scriptW.PauseWorld();
+
+        //show and unlock cursor 
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.Confined;
+        
+        //enable UI
+        playerPauseMenuUI.gameObject.SetActive(true);
+        return;
+    }
+    private void Paused()
+    {
+        //prevents resuming as soon as enter is hit
+        if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit == false)
+        {
+            methodKeyHit = true;
+        }
+        //resumes game when esc is hit
+        else if (Input.GetKeyDown(KeyCode.Escape) && methodKeyHit == true)
+        {
+            methodKeyHit = false;
+            enablePause = false;
+            ResumeGame();
         }
         return;
     }

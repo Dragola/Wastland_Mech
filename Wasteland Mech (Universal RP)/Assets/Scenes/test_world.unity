@@ -925,22 +925,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 645376229, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
-      propertyPath: m_Name
-      value: playerHealth
-      objectReference: {fileID: 0}
-    - target: {fileID: 1628346247, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
-      propertyPath: m_Name
-      value: playerMode
-      objectReference: {fileID: 0}
-    - target: {fileID: 1786175051, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
-      propertyPath: m_Name
-      value: playerFood
-      objectReference: {fileID: 0}
-    - target: {fileID: 1966734163, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
-      propertyPath: m_Name
-      value: playerWater
-      objectReference: {fileID: 0}
     - target: {fileID: 1396268209906870, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
       propertyPath: m_Name
       value: player
@@ -988,31 +972,6 @@ PrefabInstance:
     - target: {fileID: 4545825779936984, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 23093218287586120, guid: 346357f58d90c464f965b63a6e9214b7,
-        type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 23093218287586120, guid: 346357f58d90c464f965b63a6e9214b7,
-        type: 3}
-      propertyPath: m_CastShadows
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 136376722809783778, guid: 346357f58d90c464f965b63a6e9214b7,
-        type: 3}
-      propertyPath: m_Direction
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4169191634296777163, guid: 346357f58d90c464f965b63a6e9214b7,
-        type: 3}
-      propertyPath: m_Name
-      value: playerInteract
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670023597930661370, guid: 346357f58d90c464f965b63a6e9214b7,
-        type: 3}
-      propertyPath: m_Name
-      value: playerUI
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 346357f58d90c464f965b63a6e9214b7, type: 3}
@@ -1151,6 +1110,8 @@ MonoBehaviour:
   solarCount: 0
   generatorCount: 0
   powerSources: []
+  resources: []
+  minableResources: []
   solarEnabled: 0
   dayDuration: 3600
 --- !u!1001 &1969372507
