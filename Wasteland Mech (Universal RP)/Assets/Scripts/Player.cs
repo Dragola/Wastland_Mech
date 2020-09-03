@@ -830,27 +830,27 @@ public class Player : MonoBehaviour
     }
     public void QuitGame()
     {
-        Debug.Log("QuitGame");
+        //Debug.Log("QuitGame");
         Application.Quit();
         return;
     }
     public void LoadGame()
     {
-        Debug.Log("LoadGame");
+        //Debug.Log("LoadGame");
         scriptW.LoadGame();
         ResumeGame();
-        
         return;
     }
     public void SaveGame()
     {
-        Debug.Log("SaveGame");
+        //Debug.Log("SaveGame");
         scriptW.SaveGame();
         return;
     }
     public void ResumeGame()
     {
-        Debug.Log("ResumeGame");
+        //Debug.Log("ResumeGame");
+        
         //enables movement and disables pause
         enableMovement = true;
         enablePause = false;
@@ -873,7 +873,7 @@ public class Player : MonoBehaviour
     }
     public void PauseGame()
     {
-        Debug.Log("PauseGame");
+        //Debug.Log("PauseGame");
 
         //disable movement and enable pause
         enableMovement = false;

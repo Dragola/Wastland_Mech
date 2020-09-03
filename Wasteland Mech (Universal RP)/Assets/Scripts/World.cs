@@ -7,7 +7,7 @@ using System.IO;
 
 public class World : MonoBehaviour
 {
-    private GameObject player = null;
+    public GameObject player = null;
     public byte solarCount = 0;
     public byte generatorCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
@@ -129,9 +129,6 @@ public class World : MonoBehaviour
 
         //closes file
         file.Close();
-
-        Debug.Log("Game Saved");
-
         return;
     }
 
@@ -147,19 +144,22 @@ public class World : MonoBehaviour
 
             //loads values
             //player position and rotation
+            //Debug.Log("Loaded player transform- X:" + save.playerX + " Y: " + save.playerY + " Z: " + save.playerZ);
             player.transform.position = new Vector3(save.playerX, save.playerY, save.playerZ);
-            player.transform.rotation = new Quaternion(save.playerRX, save.playerRY, save.playerRZ, 1);
-            GameObject.Find("playerCamera").transform.rotation = new Quaternion(save.playerCameraRotation, 0, 0, 1);
+            
+            //Debug.Log("Loaded player rotation: " + save.playerRoataion);
+            player.transform.eulerAngles = new Vector3(0, save.playerRoataion, 0);
+
+            //Debug.Log("Loaded player camera roataion: " + save.playerCameraRotation);
+            GameObject.Find("playerCamera").transform.eulerAngles = new Vector3(save.playerCameraRotation, save.playerRoataion, 0);
 
             solarCount = save.solarCount;
             generatorCount = save.generatorCount;
             
             //sun and time
             sun.transform.position = new Vector3(save.sunX, save.sunY, save.sunZ);
-            sun.transform.rotation = new Quaternion(save.sunRX, 0, 0, 1);
+            sun.transform.rotation = Quaternion.Euler(save.sunRotation, 0, 0);
             dayDuration = save.time;
-            
-            Debug.Log("Game Loaded");
         }
         //if there is not a save file
         else
@@ -177,10 +177,8 @@ public class World : MonoBehaviour
             playerX = player.transform.position.x,
             playerY = player.transform.position.y,
             playerZ = player.transform.position.z,
-            playerRX = player.transform.rotation.x,
-            playerRY = player.transform.rotation.y,
-            playerRZ = player.transform.rotation.z,
-            playerCameraRotation = GameObject.Find("playerCamera").transform.rotation.x,
+            playerRoataion = player.transform.eulerAngles.y,
+            playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x,
 
             //solar and generator count
             solarCount = solarCount,
@@ -190,7 +188,7 @@ public class World : MonoBehaviour
             sunX = sun.transform.position.x,
             sunY = sun.transform.position.y,
             sunZ = sun.transform.position.z,
-            sunRX = sun.transform.rotation.x,
+            sunRotation = sun.transform.eulerAngles.x,
             time = dayDuration
     };
 
@@ -212,9 +210,7 @@ class SaveData
     public float playerX;
     public float playerY;
     public float playerZ;
-    public float playerRX;
-    public float playerRY;
-    public float playerRZ;
+    public float playerRoataion;
     public float playerCameraRotation;
 
     public byte solarCount;
@@ -223,6 +219,6 @@ class SaveData
     public float sunX;
     public float sunY;
     public float sunZ;
-    public float sunRX;
+    public float sunRotation;
     public float time;
 }
