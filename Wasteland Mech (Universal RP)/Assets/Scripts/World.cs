@@ -28,6 +28,9 @@ public class World : MonoBehaviour
 
         //player
         player = GameObject.Find("player");
+
+        //resource (test)
+        resources.Add(GameObject.Find("wood"));
     }
 
     // Update is called once per frame (60fps = 60calls)
@@ -160,6 +163,12 @@ public class World : MonoBehaviour
             sun.transform.position = new Vector3(save.sunX, save.sunY, save.sunZ);
             sun.transform.rotation = Quaternion.Euler(save.sunRotation, 0, 0);
             dayDuration = save.time;
+
+            //test
+            foreach (Vector3 resource in save.resourceObjects)
+            {
+                Debug.Log(resource);
+            }
         }
         //if there is not a save file
         else
@@ -168,7 +177,7 @@ public class World : MonoBehaviour
         }
         return;
     }
-    private SaveData CreateSaveObject()
+    private SaveData CreateSaveObject() //makes save file
     {
         //didn't know you could do this...
         SaveData save = new SaveData
@@ -189,8 +198,14 @@ public class World : MonoBehaviour
             sunY = sun.transform.position.y,
             sunZ = sun.transform.position.z,
             sunRotation = sun.transform.eulerAngles.x,
-            time = dayDuration
-    };
+            time = dayDuration,
+        };
+
+        //add resources
+        foreach (GameObject resource in resources)
+        {
+            save.resourceObjects.Add(resource.transform.position);
+        }
 
         return save;
     }
@@ -205,20 +220,39 @@ public class World : MonoBehaviour
 }
 
 [Serializable]
-class SaveData
+class playerData
 {
     public float playerX;
     public float playerY;
     public float playerZ;
     public float playerRoataion;
     public float playerCameraRotation;
-
-    public byte solarCount;
-    public byte generatorCount;
-
+}
+[Serializable]
+class worldData
+{
     public float sunX;
     public float sunY;
     public float sunZ;
     public float sunRotation;
     public float time;
+    public byte solarCount;
+    public byte generatorCount;
+}
+
+[Serializable]
+class resourceData
+{
+    public string resourceName;
+    public float resourcePositionX;
+    public float resourcePositionY;
+    public float resourcePositionZ;
+}
+[Serializable]
+class minableResourceData
+{
+    public string minableResourceName;
+    public float minableResourceX;
+    public float minableResourceY;
+    public float minableResourceZ;
 }
