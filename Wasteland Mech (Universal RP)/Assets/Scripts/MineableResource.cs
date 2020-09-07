@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class MinableResource : MonoBehaviour
+public class MineableResource : MonoBehaviour
 {
     public byte health = 0;
     // Start is called before the first frame update
@@ -41,5 +41,14 @@ public class MinableResource : MonoBehaviour
             Destroy(this.gameObject);
         }
         return this.name;
+    }
+    public byte GetHealth()
+    {
+        return health;
+    }
+    public void SetHealth(byte health)
+    {
+        this.health = health;
+        return;
     }
 }

@@ -191,7 +191,7 @@ public class Player : MonoBehaviour
                     if (OpenInventorySlot(GetHarvestableResource(reachableObject.transform.parent.name)))
                     {
                         //accesses resource script to subtract health
-                        reachableObject.transform.parent.GetComponent<MinableResource>().HitResource(harvestRate);
+                        reachableObject.transform.parent.GetComponent<MineableResource>().HitResource(harvestRate);
 
                         //multiple recource collection by harvest rate
                         for (byte i = 0; i < harvestRate; i++)
@@ -788,6 +788,9 @@ public class Player : MonoBehaviour
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "solar_panel" + scriptW.getSolarCount();
+
+                //sets the tag of the gameobject
+                buildingGameObject.tag = "power";
             }
             //generator
             else if (buildingSelected == 2)
@@ -795,7 +798,11 @@ public class Player : MonoBehaviour
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/generator") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "generator" + scriptW.getSolarCount();
+                
+                //sets the tag of the gameobject
+                buildingGameObject.tag = "power";
             }
+
             //sets the buildingObject as a child of world
             buildingGameObject.transform.parent = GameObject.Find("world").transform;
 

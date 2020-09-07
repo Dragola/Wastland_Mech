@@ -8,6 +8,9 @@ TagManager:
   - item
   - harvestable
   - crafting
+  - IgnoreRay
+  - power
+  - mineableResource
   layers:
   - Default
   - TransparentFX

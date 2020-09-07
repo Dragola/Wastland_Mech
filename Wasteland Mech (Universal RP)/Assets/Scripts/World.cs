@@ -159,14 +159,22 @@ public class World : MonoBehaviour
             sun.transform.rotation = Quaternion.Euler(save.world.sunRotation, 0, 0);
             dayDuration = save.world.time;
 
-            Debug.Log("Spawn resources");
             //resources
             foreach (resourceData resource in save.resources)
             {
-                Debug.Log("Spawning " + resource.resourceName);
+                //Debug.Log("Spawning " + resource.resourceName);
                 GameObject resourcePrefab = Resources.Load("Prefabs/Resources/" + resource.resourceName) as GameObject;
                 GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(resource.resourcePositionX, resource.resourcePositionY, resource.resourcePositionZ), Quaternion.identity);
                 spawnedResource.name = resource.resourceName;
+            }
+            //mineableResources
+            foreach (mineableResourceData minableResource in save.minableResources)
+            {
+                //Debug.Log("Spawning " + minableResource.mineableResourceName);
+                GameObject resourcePrefab = Resources.Load("Prefabs/Resources/" + minableResource.mineableResourceName) as GameObject;
+                GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(minableResource.mineableResourceX, minableResource.mineableResourceY, minableResource.mineableResourceZ), Quaternion.identity);
+                spawnedResource.name = minableResource.mineableResourceName;
+                spawnedResource.GetComponent<MineableResource>().SetHealth(minableResource.health);
             }
         }
         //if there is not a save file
@@ -197,19 +205,31 @@ public class World : MonoBehaviour
         save.world.sunRotation = sun.transform.eulerAngles.x;
         save.world.time = dayDuration;
 
+        //get all objects for saving
         GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
-        GameObject[] minableResources = GameObject.FindGameObjectsWithTag("harvestable");
-        
+        GameObject[] minableResources = GameObject.FindGameObjectsWithTag("mineableResource");
+        //GameObject[] power = GameObject.FindGameObjectsWithTag("power");
+
         //resources
         foreach (GameObject resource in resources)
         {
-            Debug.Log("Saved " + resource.name);
             resourceData resourceAdd = new resourceData();
             resourceAdd.resourceName = resource.name;
             resourceAdd.resourcePositionX = resource.transform.position.x;
             resourceAdd.resourcePositionY = resource.transform.position.y;
             resourceAdd.resourcePositionZ = resource.transform.position.z;
             save.resources.Add(resourceAdd);
+        }
+        //minable resources
+        foreach (GameObject mineableResource in minableResources)
+        {
+            mineableResourceData minableAdd = new mineableResourceData();
+            minableAdd.mineableResourceName = mineableResource.name;
+            minableAdd.mineableResourceX = mineableResource.transform.position.x;
+            minableAdd.mineableResourceY = mineableResource.transform.position.y;
+            minableAdd.mineableResourceZ = mineableResource.transform.position.z;
+            minableAdd.health = mineableResource.GetComponent<MineableResource>().GetHealth();
+            save.minableResources.Add(minableAdd);
         }
 
         //resource data
@@ -231,7 +251,7 @@ class SaveData
     public playerData player =new playerData();
     public worldData world = new worldData();
     public List<resourceData> resources = new List<resourceData>();
-    public List<minableResourceData> minableResources = new List<minableResourceData>();
+    public List<mineableResourceData> minableResources = new List<mineableResourceData>();
 }
 [Serializable]
 class playerData
@@ -263,11 +283,11 @@ class resourceData
     public float resourcePositionZ = 0;
 }
 [Serializable]
-class minableResourceData
+class mineableResourceData
 {
-    public string minableResourceName = "";
-    public float minableResourceX = 0;
-    public float minableResourceY = 0;
-    public float minableResourceZ = 0;
+    public string mineableResourceName = "";
+    public float mineableResourceX = 0;
+    public float mineableResourceY = 0;
+    public float mineableResourceZ = 0;
     public byte health = 0;
 }
