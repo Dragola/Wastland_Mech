@@ -849,24 +849,13 @@ public class Player : MonoBehaviour
     }
     public void ResumeGame()
     {
-        //Debug.Log("ResumeGame");
-        
+        //resume time at normal rate
+        Time.timeScale = 1;
+
         //enables movement and disables pause
         enableMovement = true;
         enablePause = false;
         methodKeyHit = false;
-
-        //set rigidbody constraints (disable position but re-freeze rotation)
-        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
-
-        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
-
-        //unfreeze all resources
-        foreach (GameObject resource in resources)
-        {
-            resource.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-        }
 
         //resume world
         scriptW.ResumeWorld();
@@ -881,22 +870,12 @@ public class Player : MonoBehaviour
     }
     public void PauseGame()
     {
-        //Debug.Log("PauseGame");
+        //pause time
+        Time.timeScale = 0;
 
         //disable movement and enable pause
         enableMovement = false;
         enablePause = true;
-        
-        //freeze rigidbody position (rotation is already frozen)
-        this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
-
-        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
-
-        //freeze all resources
-        foreach (GameObject resource in resources)
-        {
-            resource.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-        }
 
         //pause world
         scriptW.PauseWorld();
