@@ -860,6 +860,14 @@ public class Player : MonoBehaviour
         this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
         this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
 
+        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
+
+        //unfreeze all resources
+        foreach (GameObject resource in resources)
+        {
+            resource.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        }
+
         //resume world
         scriptW.ResumeWorld();
 
@@ -881,6 +889,14 @@ public class Player : MonoBehaviour
         
         //freeze rigidbody position (rotation is already frozen)
         this.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition;
+
+        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
+
+        //freeze all resources
+        foreach (GameObject resource in resources)
+        {
+            resource.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        }
 
         //pause world
         scriptW.PauseWorld();

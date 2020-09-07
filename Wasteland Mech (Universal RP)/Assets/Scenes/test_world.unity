@@ -696,7 +696,7 @@ PrefabInstance:
     - target: {fileID: 4994200967218374592, guid: 932c1c5a7370cb1479ca1d97580e5dcc,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4994200967218374592, guid: 932c1c5a7370cb1479ca1d97580e5dcc,
         type: 3}
@@ -1107,12 +1107,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89b209c26d70257448147010f006de99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerGameObject: {fileID: 0}
   solarCount: 0
   generatorCount: 0
   powerSources: []
-  resources: []
-  minableResources: []
   solarEnabled: 0
+  paused: 0
   dayDuration: 3600
 --- !u!1001 &1969372507
 PrefabInstance:

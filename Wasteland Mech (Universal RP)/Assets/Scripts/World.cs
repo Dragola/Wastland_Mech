@@ -7,12 +7,10 @@ using System.IO;
 
 public class World : MonoBehaviour
 {
-    public GameObject player = null;
+    public GameObject playerGameObject = null;
     public byte solarCount = 0;
     public byte generatorCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
-    public List<GameObject> resources = new List<GameObject>();
-    public List<GameObject> minableResources = new List<GameObject>();
     public bool solarEnabled = false;
     public bool paused = false;
     
@@ -27,10 +25,7 @@ public class World : MonoBehaviour
         sun = GameObject.Find("sun");
 
         //player
-        player = GameObject.Find("player");
-
-        //resource (test)
-        resources.Add(GameObject.Find("wood"));
+        playerGameObject = GameObject.Find("player");
     }
 
     // Update is called once per frame (60fps = 60calls)
@@ -148,26 +143,30 @@ public class World : MonoBehaviour
             //loads values
             //player position and rotation
             //Debug.Log("Loaded player transform- X:" + save.playerX + " Y: " + save.playerY + " Z: " + save.playerZ);
-            player.transform.position = new Vector3(save.playerX, save.playerY, save.playerZ);
-            
+            playerGameObject.transform.position = new Vector3(save.player.playerX, save.player.playerY, save.player.playerZ);
+
             //Debug.Log("Loaded player rotation: " + save.playerRoataion);
-            player.transform.eulerAngles = new Vector3(0, save.playerRoataion, 0);
+            playerGameObject.transform.eulerAngles = new Vector3(0, save.player.playerRoataion, 0);
 
             //Debug.Log("Loaded player camera roataion: " + save.playerCameraRotation);
-            GameObject.Find("playerCamera").transform.eulerAngles = new Vector3(save.playerCameraRotation, save.playerRoataion, 0);
+            GameObject.Find("playerCamera").transform.eulerAngles = new Vector3(save.player.playerCameraRotation, save.player.playerRoataion, 0);
 
-            solarCount = save.solarCount;
-            generatorCount = save.generatorCount;
+            solarCount = save.world.solarCount;
+            generatorCount = save.world.generatorCount;
             
             //sun and time
-            sun.transform.position = new Vector3(save.sunX, save.sunY, save.sunZ);
-            sun.transform.rotation = Quaternion.Euler(save.sunRotation, 0, 0);
-            dayDuration = save.time;
+            sun.transform.position = new Vector3(save.world.sunX, save.world.sunY, save.world.sunZ);
+            sun.transform.rotation = Quaternion.Euler(save.world.sunRotation, 0, 0);
+            dayDuration = save.world.time;
 
-            //test
-            foreach (Vector3 resource in save.resourceObjects)
+            Debug.Log("Spawn resources");
+            //resources
+            foreach (resourceData resource in save.resources)
             {
-                Debug.Log(resource);
+                Debug.Log("Spawning " + resource.resourceName);
+                GameObject resourcePrefab = Resources.Load("Prefabs/Resources/" + resource.resourceName) as GameObject;
+                GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(resource.resourcePositionX, resource.resourcePositionY, resource.resourcePositionZ), Quaternion.identity);
+                spawnedResource.name = resource.resourceName;
             }
         }
         //if there is not a save file
@@ -179,34 +178,41 @@ public class World : MonoBehaviour
     }
     private SaveData CreateSaveObject() //makes save file
     {
-        //didn't know you could do this...
-        SaveData save = new SaveData
-        {
-            //player position
-            playerX = player.transform.position.x,
-            playerY = player.transform.position.y,
-            playerZ = player.transform.position.z,
-            playerRoataion = player.transform.eulerAngles.y,
-            playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x,
+        SaveData save = new SaveData();
 
-            //solar and generator count
-            solarCount = solarCount,
-            generatorCount = generatorCount,
+        //player data
+        save.player.playerX = playerGameObject.transform.position.x;
+        save.player.playerY = playerGameObject.transform.position.y;
+        save.player.playerZ = playerGameObject.transform.position.z;
+        save.player.playerRoataion = playerGameObject.transform.eulerAngles.y;
+        save.player.playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x;
 
-            //sun and time
-            sunX = sun.transform.position.x,
-            sunY = sun.transform.position.y,
-            sunZ = sun.transform.position.z,
-            sunRotation = sun.transform.eulerAngles.x,
-            time = dayDuration,
-        };
+        //world data
+        save.world.solarCount = solarCount;
+        save.world.generatorCount = generatorCount;
+        //sun and time
+        save.world.sunX = sun.transform.position.x;
+        save.world.sunY = sun.transform.position.y;
+        save.world.sunZ = sun.transform.position.z;
+        save.world.sunRotation = sun.transform.eulerAngles.x;
+        save.world.time = dayDuration;
 
-        //add resources
+        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
+        GameObject[] minableResources = GameObject.FindGameObjectsWithTag("harvestable");
+        
+        //resources
         foreach (GameObject resource in resources)
         {
-            save.resourceObjects.Add(resource.transform.position);
+            Debug.Log("Saved " + resource.name);
+            resourceData resourceAdd = new resourceData();
+            resourceAdd.resourceName = resource.name;
+            resourceAdd.resourcePositionX = resource.transform.position.x;
+            resourceAdd.resourcePositionY = resource.transform.position.y;
+            resourceAdd.resourcePositionZ = resource.transform.position.z;
+            save.resources.Add(resourceAdd);
         }
 
+        //resource data
         return save;
     }
     public void PauseWorld()
@@ -220,39 +226,48 @@ public class World : MonoBehaviour
 }
 
 [Serializable]
+class SaveData
+{
+    public playerData player =new playerData();
+    public worldData world = new worldData();
+    public List<resourceData> resources = new List<resourceData>();
+    public List<minableResourceData> minableResources = new List<minableResourceData>();
+}
+[Serializable]
 class playerData
 {
-    public float playerX;
-    public float playerY;
-    public float playerZ;
-    public float playerRoataion;
-    public float playerCameraRotation;
+    public float playerX = 0;
+    public float playerY = 0;
+    public float playerZ = 0;
+    public float playerRoataion = 0;
+    public float playerCameraRotation = 0;
 }
 [Serializable]
 class worldData
 {
-    public float sunX;
-    public float sunY;
-    public float sunZ;
-    public float sunRotation;
-    public float time;
-    public byte solarCount;
-    public byte generatorCount;
+    public float sunX = 0;
+    public float sunY = 0;
+    public float sunZ = 0;
+    public float sunRotation = 0;
+    public float time = 0;
+    public byte solarCount = 0;
+    public byte generatorCount = 0;
 }
 
 [Serializable]
 class resourceData
 {
-    public string resourceName;
-    public float resourcePositionX;
-    public float resourcePositionY;
-    public float resourcePositionZ;
+    public string resourceName = "";
+    public float resourcePositionX = 0;
+    public float resourcePositionY = 0;
+    public float resourcePositionZ = 0;
 }
 [Serializable]
 class minableResourceData
 {
-    public string minableResourceName;
-    public float minableResourceX;
-    public float minableResourceY;
-    public float minableResourceZ;
+    public string minableResourceName = "";
+    public float minableResourceX = 0;
+    public float minableResourceY = 0;
+    public float minableResourceZ = 0;
+    public byte health = 0;
 }
