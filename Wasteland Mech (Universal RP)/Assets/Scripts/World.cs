@@ -102,18 +102,16 @@ public class World : MonoBehaviour
             if (powerSource.name.Contains("solar"))
             {
                 powerSource.GetComponent<SolarPower>().solarEnabled(solarEnabled);
-                //Debug.Log("Enabled solar generation for: " + powerSource.name);
             }
             else if (powerSource.name.Contains("generator"))
             {
                 powerSource.GetComponent<GeneratorPower>().generatorEnabled(true);
-                //Debug.Log("Enabled solar generation for: " + powerSource.name);
             }
 
         }
         return;
     }
-    public void SaveGame()
+    public void SaveGame() // save game
     {
         //save object
         SaveData save = CreateSaveObject();
@@ -130,7 +128,7 @@ public class World : MonoBehaviour
         return;
     }
 
-    public void LoadGame()
+    public void LoadGame() // load game
     {
         //if there is a save file
         if (File.Exists(Application.persistentDataPath + "/save.save"))
@@ -140,16 +138,12 @@ public class World : MonoBehaviour
             SaveData save = (SaveData)bf.Deserialize(file);
             file.Close();
 
-            //loads values
             //player position and rotation
-            //Debug.Log("Loaded player transform- X:" + save.playerX + " Y: " + save.playerY + " Z: " + save.playerZ);
             playerGameObject.transform.position = new Vector3(save.player.playerX, save.player.playerY, save.player.playerZ);
-
-            //Debug.Log("Loaded player rotation: " + save.playerRoataion);
             playerGameObject.transform.eulerAngles = new Vector3(0, save.player.playerRoataion, 0);
-
-            //Debug.Log("Loaded player camera roataion: " + save.playerCameraRotation);
+            playerGameObject.GetComponent<Player>().SetHealth(save.player.health);
             GameObject.Find("playerCamera").transform.eulerAngles = new Vector3(save.player.playerCameraRotation, save.player.playerRoataion, 0);
+            GameObject.Find("playerRaycastPoint").transform.eulerAngles = new Vector3(save.player.playerCameraRotation, save.player.playerRoataion, 0);
 
             solarCount = save.world.solarCount;
             generatorCount = save.world.generatorCount;
@@ -159,18 +153,19 @@ public class World : MonoBehaviour
             sun.transform.rotation = Quaternion.Euler(save.world.sunRotation, 0, 0);
             dayDuration = save.world.time;
 
+            //remove any objects
+            DestroyWorldObjects();
+
             //resources
             foreach (resourceData resource in save.resources)
             {
-                //Debug.Log("Spawning " + resource.resourceName);
                 GameObject resourcePrefab = Resources.Load("Prefabs/Resources/" + resource.resourceName) as GameObject;
-                GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(resource.resourcePositionX, resource.resourcePositionY, resource.resourcePositionZ), Quaternion.identity);
+                GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(resource.resourcePositionX, resource.resourcePositionY, resource.resourcePositionZ), Quaternion.Euler(resource.resourceRotationX, resource.resourceRotationY, resource.resourceRotationZ));
                 spawnedResource.name = resource.resourceName;
             }
             //mineableResources
             foreach (mineableResourceData minableResource in save.minableResources)
             {
-                //Debug.Log("Spawning " + minableResource.mineableResourceName);
                 GameObject resourcePrefab = Resources.Load("Prefabs/Resources/" + minableResource.mineableResourceName) as GameObject;
                 GameObject spawnedResource = Instantiate(resourcePrefab, new Vector3(minableResource.mineableResourceX, minableResource.mineableResourceY, minableResource.mineableResourceZ), Quaternion.identity);
                 spawnedResource.name = minableResource.mineableResourceName;
@@ -194,10 +189,12 @@ public class World : MonoBehaviour
         save.player.playerZ = playerGameObject.transform.position.z;
         save.player.playerRoataion = playerGameObject.transform.eulerAngles.y;
         save.player.playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x;
+        save.player.health = playerGameObject.GetComponent<Player>().GetHealth();
 
         //world data
         save.world.solarCount = solarCount;
         save.world.generatorCount = generatorCount;
+
         //sun and time
         save.world.sunX = sun.transform.position.x;
         save.world.sunY = sun.transform.position.y;
@@ -218,6 +215,9 @@ public class World : MonoBehaviour
             resourceAdd.resourcePositionX = resource.transform.position.x;
             resourceAdd.resourcePositionY = resource.transform.position.y;
             resourceAdd.resourcePositionZ = resource.transform.position.z;
+            resourceAdd.resourceRotationX = resource.transform.eulerAngles.x;
+            resourceAdd.resourceRotationY = resource.transform.eulerAngles.y;
+            resourceAdd.resourceRotationZ = resource.transform.eulerAngles.z;
             save.resources.Add(resourceAdd);
         }
         //minable resources
@@ -243,10 +243,24 @@ public class World : MonoBehaviour
     {
         paused = false;
     }
+    public void DestroyWorldObjects() //destroys any resources, mineableResources in scene
+    {
+        GameObject[] resources = GameObject.FindGameObjectsWithTag("resource");
+        GameObject[] mineableResources = GameObject.FindGameObjectsWithTag("mineableResource");
+
+        foreach (GameObject resource in resources)
+        {
+            Destroy(resource);
+        }
+        foreach (GameObject mineableResource in mineableResources)
+        {
+            Destroy(mineableResource);
+        }
+    }
 }
 
 [Serializable]
-class SaveData
+class SaveData //main save
 {
     public playerData player =new playerData();
     public worldData world = new worldData();
@@ -254,16 +268,17 @@ class SaveData
     public List<mineableResourceData> minableResources = new List<mineableResourceData>();
 }
 [Serializable]
-class playerData
+class playerData //player data
 {
     public float playerX = 0;
     public float playerY = 0;
     public float playerZ = 0;
     public float playerRoataion = 0;
     public float playerCameraRotation = 0;
+    public byte health = 0;
 }
 [Serializable]
-class worldData
+class worldData //world data
 {
     public float sunX = 0;
     public float sunY = 0;
@@ -275,15 +290,18 @@ class worldData
 }
 
 [Serializable]
-class resourceData
+class resourceData //resource data
 {
     public string resourceName = "";
     public float resourcePositionX = 0;
     public float resourcePositionY = 0;
     public float resourcePositionZ = 0;
+    public float resourceRotationX = 0;
+    public float resourceRotationY = 0;
+    public float resourceRotationZ = 0;
 }
 [Serializable]
-class mineableResourceData
+class mineableResourceData //mineableResource Data
 {
     public string mineableResourceName = "";
     public float mineableResourceX = 0;

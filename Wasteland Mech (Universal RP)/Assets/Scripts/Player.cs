@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     private World scriptW = null;
 
     //player
+    public byte health = 100;
     public float moveX = 0;
     public float moveY = 0;
     private Rigidbody playerRigidbody = null;
@@ -307,7 +308,6 @@ public class Player : MonoBehaviour
             //enables build mode
             if (enableBuild == false)
             {
-                Debug.Log("Build mode enabled");
                 enableBuild = true;
             }
         }
@@ -559,7 +559,6 @@ public class Player : MonoBehaviour
     //adds item to inventory
     private void InventoryAdd(string item)
     {
-        //Debug.Log("InventoryAdd called with item = " + item);
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
         bool slotFound = false;
@@ -570,14 +569,12 @@ public class Player : MonoBehaviour
             //finds first open slot and marks
             if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
             {
-                //Debug.Log("First free slot = " + i);
                 firstFreeSlot = (sbyte)i;
             }
 
             //add to existing slot
             else if (inventorySlot[i].CompareTo(item) == 0 && inventorySize[i] != 100)
             {
-                //Debug.Log("Existing item: " + item);
                 slotFound = true;
                 inventorySize[i]++;
                 InventoryUpdate(i);
@@ -587,7 +584,6 @@ public class Player : MonoBehaviour
         //if item isn't in inventory and inventory isn't full
         if (slotFound == false && firstFreeSlot != -1)
         {
-            //Debug.Log("New item: " + item);
             inventorySlot[firstFreeSlot] = item;
             inventorySize[firstFreeSlot]++;
             InventoryUpdate((byte)firstFreeSlot);
@@ -664,7 +660,7 @@ public class Player : MonoBehaviour
     private bool OpenInventorySlot(string resource)
     {
         bool openSlot = false;
-        //Debug.Log("Resource to chekc for: " + resource);
+
         //check slots
         for (byte i = 0; i < inventorySize.Length; i++)
         {
@@ -802,12 +798,9 @@ public class Player : MonoBehaviour
                 //sets the tag of the gameobject
                 buildingGameObject.tag = "power";
             }
-
-            //sets the buildingObject as a child of world
-            buildingGameObject.transform.parent = GameObject.Find("world").transform;
-
             //set layer for object (ignores raycast so doesn't hit its self)
             buildingGameObject.layer = 2;
+
             //set layer for each child object in building (ignores raycast so doesn't hit its self)
             foreach (Transform child in buildingGameObject.transform)
             {
@@ -826,31 +819,28 @@ public class Player : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Q))
             {
-                buildingGameObject.transform.Rotate(0, 1, 0);
+                buildingGameObject.transform.Rotate(0, 1.5f, 0);
             }
             else if (Input.GetKey(KeyCode.E))
             {
-                buildingGameObject.transform.Rotate(0, -1, 0);
+                buildingGameObject.transform.Rotate(0, -1.5f, 0);
             }
         }
         return;
     }
     public void QuitGame()
     {
-        //Debug.Log("QuitGame");
         Application.Quit();
         return;
     }
     public void LoadGame()
     {
-        //Debug.Log("LoadGame");
         scriptW.LoadGame();
         ResumeGame();
         return;
     }
     public void SaveGame()
     {
-        //Debug.Log("SaveGame");
         scriptW.SaveGame();
         return;
     }
@@ -910,5 +900,13 @@ public class Player : MonoBehaviour
             ResumeGame();
         }
         return;
+    }
+    public byte GetHealth()
+    {
+        return health;
+    }
+    public void SetHealth(byte health)
+    {
+        this.health = health;
     }
 }
