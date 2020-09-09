@@ -56,6 +56,9 @@ public class Player : MonoBehaviour
     public byte[] inventorySize = null;
     public sbyte slotSelected = -1;
 
+    public int avgFrameRate = 0;
+    public Text avgFrameRateText = null;
+
     //runs before awake
     private void Awake()
     {
@@ -94,6 +97,7 @@ public class Player : MonoBehaviour
         playerModeText = GameObject.Find("playerMode").GetComponent<Text>();
         playerInventoryUI = GameObject.Find("playerInventoryUI").GetComponent<Canvas>();
         playerPauseMenuUI = GameObject.Find("playerPauseMenuUI").GetComponent<Canvas>();
+        avgFrameRateText = GameObject.Find("playerFPS").GetComponent<Text>();
         playerInventoryUI.gameObject.SetActive(false);
         playerPauseMenuUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
@@ -139,6 +143,12 @@ public class Player : MonoBehaviour
             melee = false;
             meleeTime = 3;
         }
+
+        //frame rate
+        float currentFrameRate = 0;
+        currentFrameRate = Time.frameCount / Time.time;
+        avgFrameRate = (int)currentFrameRate;
+        avgFrameRateText.text = currentFrameRate.ToString() + " FPS";
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
