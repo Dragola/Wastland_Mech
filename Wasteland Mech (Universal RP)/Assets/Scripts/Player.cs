@@ -40,6 +40,7 @@ public class Player : MonoBehaviour
     private Text playerModeText = null;
     private Canvas playerInventoryUI = null;
     private Canvas playerPauseMenuUI = null;
+    private Canvas playerOptionsUI = null;
 
     //bool aim = false;
 
@@ -56,7 +57,7 @@ public class Player : MonoBehaviour
     public byte[] inventorySize = null;
     public sbyte slotSelected = -1;
 
-    public int avgFrameRate = 0;
+    public int frameRate = 0;
     public Text avgFrameRateText = null;
 
     //runs before awake
@@ -97,9 +98,11 @@ public class Player : MonoBehaviour
         playerModeText = GameObject.Find("playerMode").GetComponent<Text>();
         playerInventoryUI = GameObject.Find("playerInventoryUI").GetComponent<Canvas>();
         playerPauseMenuUI = GameObject.Find("playerPauseMenuUI").GetComponent<Canvas>();
+        playerOptionsUI = GameObject.Find("playerOptionsUI").GetComponent<Canvas>();
         avgFrameRateText = GameObject.Find("playerFPS").GetComponent<Text>();
         playerInventoryUI.gameObject.SetActive(false);
         playerPauseMenuUI.gameObject.SetActive(false);
+        playerOptionsUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
 
         //fill inventorySlot with "" for default names and inventory Size with 0
@@ -145,10 +148,8 @@ public class Player : MonoBehaviour
         }
 
         //frame rate
-        float currentFrameRate = 0;
-        currentFrameRate = Time.frameCount / Time.time;
-        avgFrameRate = (int)currentFrameRate;
-        avgFrameRateText.text = currentFrameRate.ToString() + " FPS";
+        frameRate = (int)(Time.frameCount / Time.time);
+        avgFrameRateText.text = frameRate.ToString() + " FPS";
     }
 
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
@@ -910,6 +911,10 @@ public class Player : MonoBehaviour
             ResumeGame();
         }
         return;
+    }
+    private void OptionsMenu()
+    {
+
     }
     public byte GetHealth()
     {
