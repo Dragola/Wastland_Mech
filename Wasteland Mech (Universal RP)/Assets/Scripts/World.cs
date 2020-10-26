@@ -145,6 +145,16 @@ public class World : MonoBehaviour
             GameObject.Find("playerCamera").transform.eulerAngles = new Vector3(save.player.playerCameraRotation, save.player.playerRoataion, 0);
             GameObject.Find("playerRaycastPoint").transform.eulerAngles = new Vector3(save.player.playerCameraRotation, save.player.playerRoataion, 0);
 
+            byte i = 0;
+            //inventory
+            foreach (playerInventoryData slot in save.inventory)
+            {
+                Debug.Log("Adding inventory slot " + i + "= " + slot.slotItem + "x" + slot.slotAmount);
+                playerGameObject.GetComponent<Player>().SetInventory(i, slot.slotItem, slot.slotAmount);
+                playerGameObject.GetComponent<Player>().InventoryUpdate(i);
+                i++;
+            }
+
             solarCount = save.world.solarCount;
             generatorCount = save.world.generatorCount;
             
@@ -171,6 +181,7 @@ public class World : MonoBehaviour
                 spawnedResource.name = minableResource.mineableResourceName;
                 spawnedResource.GetComponent<MineableResource>().SetHealth(minableResource.health);
             }
+            //player's inventory
         }
         //if there is not a save file
         else
@@ -190,6 +201,16 @@ public class World : MonoBehaviour
         save.player.playerRoataion = playerGameObject.transform.eulerAngles.y;
         save.player.playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x;
         save.player.health = playerGameObject.GetComponent<Player>().GetHealth();
+        
+        //inventory
+        for(byte i = 0; i < 4; i++)
+        {
+            playerInventoryData data = new playerInventoryData();
+            data.slotItem = playerGameObject.GetComponent<Player>().GetinventoryItem(i);
+            data.slotAmount= playerGameObject.GetComponent<Player>().GetinventoryAmount(i);
+            save.inventory.Add(data);
+        }
+        //save inventory slots
 
         //world data
         save.world.solarCount = solarCount;
@@ -264,6 +285,7 @@ class SaveData //main save
 {
     public playerData player =new playerData();
     public worldData world = new worldData();
+    public List<playerInventoryData> inventory = new List<playerInventoryData>();
     public List<resourceData> resources = new List<resourceData>();
     public List<mineableResourceData> minableResources = new List<mineableResourceData>();
 }
@@ -276,6 +298,12 @@ class playerData //player data
     public float playerRoataion = 0;
     public float playerCameraRotation = 0;
     public byte health = 0;
+}
+[Serializable]
+class playerInventoryData // player's inventory
+{
+    public string slotItem = "";
+    public byte slotAmount = 0;
 }
 [Serializable]
 class worldData //world data

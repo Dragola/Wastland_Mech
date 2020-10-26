@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
-
     //scripts
     private World scriptW = null;
 
@@ -105,6 +104,7 @@ public class Player : MonoBehaviour
         playerOptionsUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
 
+
         //fill inventorySlot with "" for default names and inventory Size with 0
         for (byte i = 0; i < inventorySlot.Length; i++)
         {
@@ -147,7 +147,7 @@ public class Player : MonoBehaviour
             meleeTime = 3;
         }
 
-        //frame rate
+        //frame rate (not sure how accurate it is)
         frameRate = (int)(Time.frameCount / Time.time);
         avgFrameRateText.text = frameRate.ToString() + " FPS";
     }
@@ -460,7 +460,7 @@ public class Player : MonoBehaviour
     }
 
     //checks for update on inventory slot
-    private void InventoryUpdate(byte slot)
+    public void InventoryUpdate(byte slot)
     {
         if (slot == 0)
         {
@@ -923,5 +923,19 @@ public class Player : MonoBehaviour
     public void SetHealth(byte health)
     {
         this.health = health;
+    }
+    public string GetinventoryItem(byte slot)
+    {
+        return inventorySlot[slot];
+    }
+    public byte GetinventoryAmount(byte slot)
+    {
+        return inventorySize[slot];
+    }
+    public void SetInventory(byte slot, string name, byte amount)
+    {
+        this.inventorySlot[slot] = name;
+        this.inventorySize[slot] = amount;
+        return;
     }
 }

@@ -116,3 +116,12 @@ The following packages were removed:
   com.unity.purchasing@2.0.6
   com.unity.render-pipelines.universal@7.3.1
   com.unity.xr.legacyinputhelpers@2.1.4
+
+=== Sun Oct 25 23:45:35 2020
+
+Packages were changed.
+Update Mode: updateDependencies
+
+The following packages were updated:
+  com.unity.ide.vscode from version 1.2.1 to 1.2.2
+  com.unity.test-framework from version 1.1.16 to 1.1.18
