@@ -115,13 +115,21 @@ public class Player : MonoBehaviour
     //updates once per frame
     void Update()
     {
-        //Movement
-        if (enableMovement)
+        //gets's mouse input
+        moveX = Input.GetAxis("Mouse X");
+        moveY = -Input.GetAxis("Mouse Y");
+
+        //if any key was hit or mouse movement
+        if (Input.anyKey || moveX != 0 || moveY != 0)
         {
-            Movement();
+            //Movement
+            if (enableMovement)
+            {
+                Movement();
+            }
         }
         //Inventory
-        else if (enableInventory)
+        if (enableInventory)
         {
             Inventory();
         }
@@ -135,6 +143,7 @@ public class Player : MonoBehaviour
         {
             Paused();
         }
+
         //melee timer
         if (melee == true && meleeTime > 0)
         {
@@ -163,10 +172,6 @@ public class Player : MonoBehaviour
     {
         //resets move detected
         move = false;
-
-        //gets's mouse input
-        moveX = Input.GetAxis("Mouse X");
-        moveY = -Input.GetAxis("Mouse Y");
 
         //rotates player
         if (moveX != 0)
@@ -210,6 +215,7 @@ public class Player : MonoBehaviour
                         {
                             //adds resource to inventory
                             InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
+                            UpdateInteractionText();
                         }
                     }
                     //no room for resource
@@ -697,7 +703,7 @@ public class Player : MonoBehaviour
             if (reachableObject.tag.CompareTo("harvestable") == 0 && playerInteractText.text.CompareTo("harvestable") != 0)
             {
                 //update interation text for harvestable object
-                text = "Press m1 to mine " + reachableObject.transform.parent.name;
+                text = "Press m1 to mine " + reachableObject.transform.parent.name + ": " + reachableObject.GetComponentInParent<MineableResource>().GetHealth();
             }
             //if objecct is resource or item
             else if (reachableObject.tag.CompareTo("resource") == 0 || reachableObject.tag.CompareTo("item") == 0)
