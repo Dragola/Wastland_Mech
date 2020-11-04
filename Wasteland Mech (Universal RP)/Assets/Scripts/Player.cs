@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class Player : MonoBehaviour
 {
@@ -316,6 +317,25 @@ public class Player : MonoBehaviour
                 else
                 {
                     Debug.Log("No room for resource");
+                }
+            }
+            //crafting interaction
+            else if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
+            {
+                Debug.Log("Crafting interact: " + reachableObject.name);
+                //furnace
+                if(reachableObject.name.CompareTo("furnaceBody") == 0 && InventoryLocateItem("scrap") != 5)
+                {
+                    Debug.Log("Furnaceing added scrap");
+
+                    byte slot = InventoryLocateItem("scrap");
+
+                    //add scrap to furnace
+                    reachableObject.GetComponentInParent<Furnace>().AddSmeltItem("scrap", inventorySize[slot]);
+                    
+                    //remove scrap from inventory and update inventory
+                    inventorySize[slot] = 0;
+                    InventoryUpdate(slot);
                 }
             }
         }
@@ -689,6 +709,23 @@ public class Player : MonoBehaviour
         }
         return openSlot;
     }
+    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Locate
+    //look for resource in players inventory
+    private byte InventoryLocateItem(string resource)
+    {
+        //slot
+        byte slot = 5;
+
+        //check slots
+        for (byte i = 0; i < inventorySize.Length; i++)
+        {
+            if (inventorySlot[i].CompareTo(resource) == 0)
+            {
+                slot = i;
+            }
+        }
+        return slot;
+    }
     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
     //updates text to indicate how to interact/use
     private void UpdateInteractionText()
@@ -714,8 +751,17 @@ public class Player : MonoBehaviour
             //if object is for crafting
             else if (reachableObject.tag.CompareTo("crafting") == 0)
             {
-                //update interation text for item/resource
-                text = "Press e to access " + reachableObject.transform.parent.name;
+                //furnace text
+                if (reachableObject.name.CompareTo("furnaceBody") == 0)
+                {
+                    text = "Press e to put scrap into the furnace. R to retrive metal.";
+                }
+                //other crafting
+                else
+                {
+                    //update interation text for item/resource
+                    text = "Press e to access " + reachableObject.transform.parent.name;
+                }
             }
         }
         //only update text if it's different

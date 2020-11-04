@@ -15,7 +15,7 @@ GameObject:
   m_TagString: mineableResource
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1521758947435304249
 Transform:
@@ -62,7 +62,7 @@ GameObject:
   m_TagString: harvestable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 1
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &4058463750007807452
 Transform:
