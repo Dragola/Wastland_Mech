@@ -1,18 +1,20 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using System;
-using System.Runtime.Serialization.Formatters.Binary;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine;
 
 public class World : MonoBehaviour
 {
     public GameObject playerGameObject = null;
     public byte solarCount = 0;
     public byte generatorCount = 0;
+    public byte furnaceCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
+    public List<GameObject> craftingObjects = new List<GameObject>();
     public bool solarEnabled = false;
     public bool paused = false;
-    
+
     //world
     GameObject sun = null;
     public float dayDuration = 3600;
@@ -37,12 +39,12 @@ public class World : MonoBehaviour
             if ((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
             {
                 solarEnabled = true;
-                powerStatusUpdate();
+                PowerStatusUpdate();
             }
             else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
             {
                 solarEnabled = false;
-                powerStatusUpdate();
+                PowerStatusUpdate();
             }
             //sun rotation
             sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
@@ -60,11 +62,11 @@ public class World : MonoBehaviour
     //runs at fixed rate
     void FixedUpdate()
     {
-        
+
     }
 
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Solar Power
-    public void addPowerSource(GameObject powerSource)
+    public void AddPowerSource(GameObject powerSource)
     {
         //increase solar count
         if (powerSource.name.Contains("solar"))
@@ -73,15 +75,15 @@ public class World : MonoBehaviour
         }
         //increase generator count
         else if (powerSource.name.Contains("generator"))
-        {        
+        {
             generatorCount++;
         }
         //add powerSource to list and update generator status
         powerSources.Add(powerSource);
-        powerStatusUpdate();
+        PowerStatusUpdate();
         return;
     }
-    public void removePowerSource(GameObject solarPanel)
+    public void RemovePowerSource(GameObject solarPanel)
     {
         //decrease solar count and remove from list
         solarCount--;
@@ -89,12 +91,12 @@ public class World : MonoBehaviour
         return;
     }
 
-    public byte getSolarCount()
+    public byte GetSolarCount()
     {
         return solarCount;
     }
 
-    public void powerStatusUpdate()
+    public void PowerStatusUpdate()
     {
         foreach (GameObject powerSource in powerSources)
         {
@@ -109,6 +111,20 @@ public class World : MonoBehaviour
 
         }
         return;
+    }
+    public void AddCraftingObject(GameObject craftObj)
+    {
+        craftingObjects.Add(craftObj);
+        if (craftObj.name.Contains("furnace"))
+        {
+            furnaceCount++;
+        }
+
+        return;
+    }
+    public byte GetFurnaceCount()
+    {
+        return furnaceCount;
     }
     public void SaveGame() // save game
     {
@@ -156,7 +172,7 @@ public class World : MonoBehaviour
 
             solarCount = save.world.solarCount;
             generatorCount = save.world.generatorCount;
-            
+
             //sun and time
             sun.transform.position = new Vector3(save.world.sunX, save.world.sunY, save.world.sunZ);
             sun.transform.rotation = Quaternion.Euler(save.world.sunRotation, 0, 0);
@@ -200,13 +216,13 @@ public class World : MonoBehaviour
         save.player.playerRoataion = playerGameObject.transform.eulerAngles.y;
         save.player.playerCameraRotation = GameObject.Find("playerCamera").transform.eulerAngles.x;
         save.player.health = playerGameObject.GetComponent<Player>().GetHealth();
-        
+
         //inventory
-        for(byte i = 0; i < 4; i++)
+        for (byte i = 0; i < 4; i++)
         {
             playerInventoryData data = new playerInventoryData();
             data.slotItem = playerGameObject.GetComponent<Player>().GetinventoryItem(i);
-            data.slotAmount= playerGameObject.GetComponent<Player>().GetinventoryAmount(i);
+            data.slotAmount = playerGameObject.GetComponent<Player>().GetinventoryAmount(i);
             save.inventory.Add(data);
         }
         //save inventory slots
@@ -282,7 +298,7 @@ public class World : MonoBehaviour
 [Serializable]
 class SaveData //main save
 {
-    public playerData player =new playerData();
+    public playerData player = new playerData();
     public worldData world = new worldData();
     public List<playerInventoryData> inventory = new List<playerInventoryData>();
     public List<resourceData> resources = new List<resourceData>();

@@ -6,7 +6,7 @@ public class MineableResource : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(this.gameObject.name.CompareTo("tree") == 0)
+        if (this.gameObject.name.CompareTo("tree") == 0)
         {
             health = 100;
         }
@@ -36,7 +36,7 @@ public class MineableResource : MonoBehaviour
         }
 
         //if gameobject has been fully harvested
-        if(this.health <= 0)
+        if (this.health <= 0)
         {
             Destroy(this.gameObject);
         }

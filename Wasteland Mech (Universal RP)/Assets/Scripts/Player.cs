@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using System;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -215,7 +215,7 @@ public class Player : MonoBehaviour
                         for (byte i = 0; i < harvestRate; i++)
                         {
                             //adds resource to inventory
-                            InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name));
+                            InventoryAdd(GetHarvestableResource(reachableObject.transform.parent.name), 1);
                             UpdateInteractionText();
                         }
                     }
@@ -308,7 +308,7 @@ public class Player : MonoBehaviour
                 //check if there is room in inventory
                 if (OpenInventorySlot(reachableObject.name))
                 {
-                    InventoryAdd(reachableObject.name);
+                    InventoryAdd(reachableObject.name, 1);
                     Destroy(reachableObject);
                     reachableObject = null;
                     UpdateInteractionText();
@@ -322,20 +322,32 @@ public class Player : MonoBehaviour
             //crafting interaction
             else if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
             {
-                Debug.Log("Crafting interact: " + reachableObject.name);
                 //furnace
-                if(reachableObject.name.CompareTo("furnaceBody") == 0 && InventoryLocateItem("scrap") != 5)
+                if (reachableObject.name.Contains("furnaceBody") && InventoryLocateItem("scrap") != 5)
                 {
-                    Debug.Log("Furnaceing added scrap");
+                    Debug.Log("Furnaceing added scrap: " + reachableObject.name);
 
                     byte slot = InventoryLocateItem("scrap");
 
                     //add scrap to furnace
                     reachableObject.GetComponentInParent<Furnace>().AddSmeltItem("scrap", inventorySize[slot]);
-                    
+
                     //remove scrap from inventory and update inventory
                     inventorySize[slot] = 0;
                     InventoryUpdate(slot);
+                }
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            //crafting interaction
+            if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
+            {
+                //check if player can get resource from furnace (free/existing slot)
+                if (reachableObject.name.Contains("furnaceBody") && OpenInventorySlot(reachableObject.GetComponentInParent<Furnace>().GetSmeltedName()))
+                {
+                    string[] smeltedItem = reachableObject.GetComponentInParent<Furnace>().GetSmeltedItem().Split(',');
+                    InventoryAdd(smeltedItem[0], Byte.Parse(smeltedItem[1]));
                 }
             }
         }
@@ -408,13 +420,14 @@ public class Player : MonoBehaviour
             //interaction
             if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, (float)1.5))
             {
+
                 //get interacted object if not already
                 if (reachableObject == null)
                 {
                     reachableObject = hit.collider.gameObject;
                 }
                 //new interacted object
-                else if (reachableObject != hit.collider.gameObject)
+                else if (reachableObject.name.CompareTo(hit.collider.gameObject.name) != 0)
                 {
                     reachableObject = hit.collider.gameObject;
                 }
@@ -426,7 +439,7 @@ public class Player : MonoBehaviour
                 reachableObject = null;
 
                 UpdateInteractionText();
-            } 
+            }
         }
         //load game
         if (Input.GetKeyDown(KeyCode.L))
@@ -594,7 +607,7 @@ public class Player : MonoBehaviour
     }
 
     //adds item to inventory
-    private void InventoryAdd(string item)
+    private void InventoryAdd(string item, byte num)
     {
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
@@ -610,10 +623,10 @@ public class Player : MonoBehaviour
             }
 
             //add to existing slot
-            else if (inventorySlot[i].CompareTo(item) == 0 && inventorySize[i] != 100)
+            else if (inventorySlot[i].CompareTo(item) == 0 && (inventorySize[i] + num) != 100)
             {
                 slotFound = true;
-                inventorySize[i]++;
+                inventorySize[i] += num;
                 InventoryUpdate(i);
             }
         }
@@ -622,7 +635,7 @@ public class Player : MonoBehaviour
         if (slotFound == false && firstFreeSlot != -1)
         {
             inventorySlot[firstFreeSlot] = item;
-            inventorySize[firstFreeSlot]++;
+            inventorySize[firstFreeSlot] += num;
             InventoryUpdate((byte)firstFreeSlot);
         }
         return;
@@ -693,13 +706,13 @@ public class Player : MonoBehaviour
         return resource;
     }
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Space
-    //check if player can collect resource (inventory is full)
+    //check if player can collect resource (look for resource in slots that has less then 100 or open slot)
     private bool OpenInventorySlot(string resource)
     {
         bool openSlot = false;
 
         //check slots
-        for (byte i = 0; i < inventorySize.Length; i++)
+        for (byte i = 0; i < inventorySize.Length && openSlot == false; i++)
         {
             //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
             if (inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
@@ -797,11 +810,21 @@ public class Player : MonoBehaviour
             {
                 //add power script- may be a way to add script to prefab for blender model
                 buildingGameObject.AddComponent<SolarPower>();
+                //add powerSource to list
+                scriptW.AddPowerSource(buildingGameObject);
             }
             else if (buildingSelected == 2)
             {
                 //add power script- may be a way to add script to prefab for blender model
                 buildingGameObject.AddComponent<GeneratorPower>();
+                //add powerSource to list
+                scriptW.AddPowerSource(buildingGameObject);
+            }
+            else if (buildingSelected == 3)
+            {
+                buildingGameObject.AddComponent<Furnace>();
+                //add powerSource to list
+                scriptW.AddCraftingObject(buildingGameObject);
             }
             //set layers for object- raycast can hit
             buildingGameObject.layer = 0;
@@ -809,9 +832,6 @@ public class Player : MonoBehaviour
             {
                 child.gameObject.layer = 0;
             }
-            //add powerSource to list
-            scriptW.addPowerSource(buildingGameObject);
-
             //null refernece so building stays in world
             buildingGameObject = null;
         }
@@ -837,6 +857,17 @@ public class Player : MonoBehaviour
             }
             buildingSelected = 2;
         }
+        //select generator
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            //if not the same building then destroy and null for new one
+            if (buildingSelected != 3)
+            {
+                Destroy(buildingGameObject);
+                buildingGameObject = null;
+            }
+            buildingSelected = 3;
+        }
 
         //if position isn't zero and a building is selected then spawn
         if (buildingSelected > 0 && buildingGameObject == null)
@@ -846,7 +877,7 @@ public class Player : MonoBehaviour
             {
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
-                buildingGameObject.name = "solar_panel" + scriptW.getSolarCount();
+                buildingGameObject.name = "solar_panel" + scriptW.GetSolarCount();
 
                 //sets the tag of the gameobject
                 buildingGameObject.tag = "power";
@@ -856,10 +887,23 @@ public class Player : MonoBehaviour
             {
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/generator") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
-                buildingGameObject.name = "generator" + scriptW.getSolarCount();
-                
+                buildingGameObject.name = "generator" + scriptW.GetSolarCount();
+
                 //sets the tag of the gameobject
                 buildingGameObject.tag = "power";
+            }
+            //furnace
+            else if (buildingSelected == 3)
+            {
+                //spawns building, finds it, then removes(Clone) from name
+                buildingGameObject = Instantiate(Resources.Load("Prefabs/Crafting/furnace") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
+
+                //set both parent name and body name (body name causeing issues with furnace interaction so now there's diff names so the rechable object doesn't point to the same furnace)
+                buildingGameObject.name = "furnace" + scriptW.GetFurnaceCount();
+                GameObject.Find("furnaceBody").name = "furnaceBody" + scriptW.GetFurnaceCount();
+
+                //sets the tag of the gameobject
+                buildingGameObject.tag = "crafting";
             }
             //set layer for object (ignores raycast so doesn't hit its self)
             buildingGameObject.layer = 2;
@@ -923,7 +967,7 @@ public class Player : MonoBehaviour
         //hide and lock cursor
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-        
+
         //diable UI
         playerPauseMenuUI.gameObject.SetActive(false);
         return;
@@ -943,7 +987,7 @@ public class Player : MonoBehaviour
         //show and unlock cursor 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.Confined;
-        
+
         //enable UI
         playerPauseMenuUI.gameObject.SetActive(true);
         return;
