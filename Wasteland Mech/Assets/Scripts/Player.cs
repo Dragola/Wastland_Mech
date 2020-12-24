@@ -806,26 +806,9 @@ public class Player : MonoBehaviour
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (buildingSelected == 1)
-            {
-                //add power script- may be a way to add script to prefab for blender model
-                buildingGameObject.AddComponent<SolarPower>();
-                //add powerSource to list
-                scriptW.AddPowerSource(buildingGameObject);
-            }
-            else if (buildingSelected == 2)
-            {
-                //add power script- may be a way to add script to prefab for blender model
-                buildingGameObject.AddComponent<GeneratorPower>();
-                //add powerSource to list
-                scriptW.AddPowerSource(buildingGameObject);
-            }
-            else if (buildingSelected == 3)
-            {
-                buildingGameObject.AddComponent<Furnace>();
-                //add powerSource to list
-                scriptW.AddCraftingObject(buildingGameObject);
-            }
+            //add schematic to object
+            buildingGameObject.AddComponent<Schematic>();
+
             //set layers for object- raycast can hit
             buildingGameObject.layer = 0;
             foreach (Transform child in buildingGameObject.transform)
@@ -834,6 +817,8 @@ public class Player : MonoBehaviour
             }
             //null refernece so building stays in world
             buildingGameObject = null;
+
+
         }
         //select solar panel
         if (Input.GetKeyDown(KeyCode.Alpha1))

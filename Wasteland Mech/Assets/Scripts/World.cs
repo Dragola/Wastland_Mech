@@ -39,12 +39,10 @@ public class World : MonoBehaviour
             if ((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
             {
                 solarEnabled = true;
-                PowerStatusUpdate();
             }
             else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
             {
                 solarEnabled = false;
-                PowerStatusUpdate();
             }
             //sun rotation
             sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
@@ -78,16 +76,25 @@ public class World : MonoBehaviour
         {
             generatorCount++;
         }
-        //add powerSource to list and update generator status
+        //add powerSource to list
         powerSources.Add(powerSource);
-        PowerStatusUpdate();
         return;
     }
-    public void RemovePowerSource(GameObject solarPanel)
+    public void RemovePowerSource(GameObject powerDevice)
     {
-        //decrease solar count and remove from list
-        solarCount--;
-        powerSources.Remove(solarPanel);
+        //increase solar count
+        if (powerDevice.name.Contains("solar"))
+        {
+            solarCount--;
+        }
+        //increase generator count
+        else if (powerDevice.name.Contains("generator"))
+        {
+            //decrease solar count and remove from list
+            generatorCount--;
+        }
+        //remove device from list
+        powerSources.Remove(powerDevice);
         return;
     }
 
@@ -95,36 +102,21 @@ public class World : MonoBehaviour
     {
         return solarCount;
     }
-
-    public void PowerStatusUpdate()
+    public byte GetFurnaceCount()
     {
-        foreach (GameObject powerSource in powerSources)
-        {
-            if (powerSource.name.Contains("solar"))
-            {
-                powerSource.GetComponent<SolarPower>().solarEnabled(solarEnabled);
-            }
-            else if (powerSource.name.Contains("generator"))
-            {
-                powerSource.GetComponent<GeneratorPower>().generatorEnabled(true);
-            }
-
-        }
-        return;
+        return furnaceCount;
     }
     public void AddCraftingObject(GameObject craftObj)
     {
+        //add crafting object/device to 
         craftingObjects.Add(craftObj);
+
+        //add furnace to list
         if (craftObj.name.Contains("furnace"))
         {
             furnaceCount++;
         }
-
         return;
-    }
-    public byte GetFurnaceCount()
-    {
-        return furnaceCount;
     }
     public void SaveGame() // save game
     {
