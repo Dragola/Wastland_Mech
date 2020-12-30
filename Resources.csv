@@ -1,0 +1,8 @@
+Type,Object,Resource,Amount,Health
+Minable,Tree,Wood,1,100
+Minable,Rock,Rock,1,100
+Minable,Rusted Metal,Scrap Metal,1,100
+Pickup,Metal,,,
+Pickup,Wood,,,
+Pickup,Rock,,,
+Pickup,Scrap Metal,,,

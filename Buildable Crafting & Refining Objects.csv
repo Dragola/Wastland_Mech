@@ -1,0 +1,5 @@
+Type,Object,Resource,Amount
+Refiner,Furnace,Metal,10
+Crafter,Basic Workbench,Metal,6
+Crafter,Basic Workbench,Wood,5
+Crafter,Basic Workbench,Circuits,2
