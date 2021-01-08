@@ -914,6 +914,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1051759630895923906, guid: 84cca9732fb364942b76d934995a6250,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1051759630895923912, guid: 84cca9732fb364942b76d934995a6250,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1051759630895923912, guid: 84cca9732fb364942b76d934995a6250,
         type: 3}
       propertyPath: _monoscopic
@@ -933,6 +943,11 @@ PrefabInstance:
         type: 3}
       propertyPath: expandMixedRealityCapturePropertySheet
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1084849760180163980, guid: 84cca9732fb364942b76d934995a6250,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 84cca9732fb364942b76d934995a6250, type: 3}

@@ -6,21 +6,25 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+    //Player
     public GameObject playerGameObject = null;
+    
+    //Power
     public byte solarCount = 0;
     public byte generatorCount = 0;
     public byte furnaceCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
     public List<GameObject> craftingObjects = new List<GameObject>();
     public bool solarEnabled = false;
+
+    //Pause
     public bool paused = false;
 
-    //world
+    //Sun
     GameObject sun = null;
     public float dayDuration = 3600;
 
-    // Use this for initialization
-    void Start()
+    private void Awake()
     {
         //sun
         sun = GameObject.Find("sun");
@@ -35,11 +39,12 @@ public class World : MonoBehaviour
         //if game isn't paused
         if (paused == false)
         {
-            //enable solar panels to generate
+            //indicate solar can generate power
             if ((dayDuration < 3600 && dayDuration > 100) && solarEnabled == false)
             {
                 solarEnabled = true;
             }
+            //indicate solar can't generate power
             else if ((dayDuration > 3600 && dayDuration < 100) && solarEnabled == true)
             {
                 solarEnabled = false;
@@ -47,7 +52,7 @@ public class World : MonoBehaviour
             //sun rotation
             sun.transform.RotateAround(Vector3.zero, Vector3.right, 1 * Time.deltaTime);
 
-            //clock
+            //clock/timer
             dayDuration -= Time.deltaTime;
 
             //reset clock/day
@@ -57,12 +62,6 @@ public class World : MonoBehaviour
             }
         }
     }
-    //runs at fixed rate
-    void FixedUpdate()
-    {
-
-    }
-
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Solar Power
     public void AddPowerSource(GameObject powerSource)
     {

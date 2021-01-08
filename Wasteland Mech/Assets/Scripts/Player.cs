@@ -66,13 +66,6 @@ public class Player : MonoBehaviour
         //have to size arrays after initialization
         inventorySlot = new string[4];
         inventorySize = new byte[4];
-    }
-    // Use this for initialization
-    void Start()
-    {
-        //cursor
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
 
         //scripts
         scriptW = GameObject.Find("world").GetComponent<World>();
@@ -100,11 +93,19 @@ public class Player : MonoBehaviour
         playerPauseMenuUI = GameObject.Find("playerPauseMenuUI").GetComponent<Canvas>();
         playerOptionsUI = GameObject.Find("playerOptionsUI").GetComponent<Canvas>();
         avgFrameRateText = GameObject.Find("playerFPS").GetComponent<Text>();
+    }
+    // Use this for initialization
+    void Start()
+    {
+        //Cursor set initial state (invisible + locked to prevent going off screen)
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked; //keeps in middle (prevents clicking out of game)
+
+        //UI set initial states (disabled)
         playerInventoryUI.gameObject.SetActive(false);
         playerPauseMenuUI.gameObject.SetActive(false);
         playerOptionsUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
-
 
         //fill inventorySlot with "" for default names and inventory Size with 0
         for (byte i = 0; i < inventorySlot.Length; i++)
@@ -161,7 +162,6 @@ public class Player : MonoBehaviour
         frameRate = (int)(Time.frameCount / Time.time);
         avgFrameRateText.text = frameRate.ToString() + " FPS";
     }
-
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
     void FixedUpdate()
     {
