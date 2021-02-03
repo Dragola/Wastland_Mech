@@ -341,7 +341,7 @@ public class Player : Character
                     byte slot = InventoryLocateItem("scrap");
 
                     //add scrap to furnace
-                    reachableObject.GetComponentInParent<Furnace>().AddSmeltItem("scrap", inventorySize[slot]);
+                    reachableObject.GetComponentInParent<Furnace>().AddRefineItem("scrap", inventorySize[slot]);
 
                     //remove scrap from inventory and update inventory
                     inventorySize[slot] = 0;
@@ -355,10 +355,15 @@ public class Player : Character
             if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
             {
                 //check if player can get resource from furnace (free/existing slot)
-                if (reachableObject.name.Contains("furnaceBody") && OpenInventorySlot(reachableObject.GetComponentInParent<Furnace>().GetSmeltedName()))
+                if (reachableObject.name.Contains("furnaceBody") && OpenInventorySlot(reachableObject.GetComponentInParent<Furnace>().GetRefinedName()))
                 {
-                    string[] smeltedItem = reachableObject.GetComponentInParent<Furnace>().GetSmeltedItem().Split(',');
-                    InventoryAdd(smeltedItem[0], Byte.Parse(smeltedItem[1]));
+                    string[] refinedItem = reachableObject.GetComponentInParent<Furnace>().GetRefinedItem().Split(',');
+                    
+                    //only add to inventory if there is resource(s) to pull from furnace
+                    if(refinedItem[0].CompareTo("") != 0)
+                    {
+                        InventoryAdd(refinedItem[0], byte.Parse(refinedItem[1]));
+                    }
                 }
             }
         }

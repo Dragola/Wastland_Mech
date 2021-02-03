@@ -1,32 +1,13 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class Furnace : MonoBehaviour
+public class Furnace : Refine
 {
-    //pause furnace if game is paused
-    private bool paused = false;
-
     //UI
     private Text furnaceNameText = null;
     private Text furnaceSmeltText = null;
     private Text furnaceSmeltedText = null;
     private Text furnaceStatusText = null;
-
-    //how long it will take to refine 1 item (30seconds)
-    public float smeltTimer = 30.0f;
-    public bool isSmelting = false;
-
-    //smelting item
-    public string smeltItemName = "";
-    public byte smeltItemNum = 0;
-
-    //smelted item
-    public string smeltedItemName = "";
-    public byte smeltedItemNum = 0;
-
-    //private byte SMELT_MAX = 50;
-    private byte SMELTED_MAX = 100;
 
     // Start is called before the first frame update
     void Start()
@@ -45,6 +26,9 @@ public class Furnace : MonoBehaviour
 
         //have counter in world for furnace count
         furnaceNameText.text = "Furnace";
+
+        //update text once spawned/placed
+        updateText = true;
     }
 
     // Update is called once per frame
@@ -54,129 +38,74 @@ public class Furnace : MonoBehaviour
         if (paused == false)
         {
             //enable smelting if it hasn't smelted the max and have something to smelt
-            if (isSmelting == false && smeltedItemNum != SMELTED_MAX && smeltItemNum != 0)
+            if (isRefining == false && refinedItemNum != SMELTED_MAX && refineItemNum != 0)
             {
                 Debug.Log("Enable Smelting");
                 UpdateStatus(true);
-                UpdateText(2);
+                updateText = true;
             }
             //disable is smelted the max
-            else if (isSmelting == true && (smeltedItemNum == SMELTED_MAX || smeltItemNum == 0))
+            else if (isRefining == true && (refinedItemNum == SMELTED_MAX || refineItemNum == 0))
             {
                 Debug.Log("Disable Smelting");
                 UpdateStatus(false);
-                UpdateText(2);
+                updateText = true;
             }
             //smelt item
-            if (isSmelting)
+            if (isRefining)
             {
                 //smelter timer active
-                if (smeltTimer > 0)
+                if (refineTimer > 0)
                 {
-                    smeltTimer -= Time.deltaTime;
-                    UpdateText(2);
+                    refineTimer -= Time.deltaTime;
+                    updateText = true;
                 }
                 //smelter is done smelting item
                 else
                 {
                     //removed item in smelt
-                    smeltItemNum -= 1;
+                    refineItemNum -= 1;
 
                     //add to smelted number
-                    smeltedItemNum += 1;
+                    refinedItemNum += 1;
 
                     //reset timer
-                    smeltTimer = 30.0f;
+                    refineTimer = 30.0f;
 
-                    //update text's
-                    UpdateText(0);
-                    UpdateText(1);
+                    //update text
+                    updateText = true;
                 }
             }
+            //update text when indicated
+            if (updateText)
+            {
+                UpdateText();
+            }
         }
     }
-    public void AddSmeltItem(string itemName, byte numberItems)
+
+    private void UpdateText()
     {
-        //same item
-        if (smeltItemName.CompareTo(itemName) == 0)
-        {
-            smeltItemNum += numberItems;
-            UpdateText(0);
+        //if there is at least 1 refine or refined item
+        if (refinedItemNum > 0 || refineItemNum > 0) { 
+            furnaceSmeltText.text = refineItemName + " x " + refineItemNum;
+            furnaceSmeltedText.text = refinedItemName + " x " + refinedItemNum;
         }
-        //different item
         else
         {
-            //set smelt item + num and update text
-            smeltItemName = itemName;
-            smeltItemNum = numberItems;
-            UpdateText(0);
+            furnaceSmeltText.text = "Awaiting resource";
+            furnaceSmeltedText.text = "";
+        }
 
-            //set and update text for smelted item
-            SetSmeltedName(smeltItemName);
-        }
-    }
-    private void UpdateStatus(Boolean status)
-    {
-        //disable smelting
-        if (status == false && isSmelting == true)
-        {
-            isSmelting = false;
-        }
-        //enable smelting
-        else if (status == true && isSmelting == false)
-        {
-            isSmelting = true;
-        }
-    }
-    private void UpdateText(byte textIndex)
-    {
-        //smelt item
-        if (textIndex == 0)
-        {
-            furnaceSmeltText.text = smeltItemName + " x " + smeltItemNum;
-        }
-        //smelted item
-        else if (textIndex == 1)
-        {
-            furnaceSmeltedText.text = smeltedItemName + " x " + smeltedItemNum;
-        }
         //furnace status
-        else if (textIndex == 2)
+        if (isRefining == true)
         {
-            if (isSmelting == true)
-            {
-                furnaceStatusText.text = "Status: Smelting = " + string.Format("{0:0.#}", smeltTimer);
-            }
-            else
-            {
-                furnaceStatusText.text = "Status: Idle";
-            }
+            furnaceStatusText.text = "Status: Smelting = " + string.Format("{0:0.#}", refineTimer);
         }
-    }
-    public string GetSmeltedItem()
-    {
-        string smelted = smeltedItemName + "," + smeltedItemNum;
-
-        smeltedItemNum = 0;
-        UpdateText(1);
-
-        return smelted;
-    }
-    public string GetSmeltedName()
-    {
-        return smeltedItemName;
-    }
-    private void SetSmeltedName(string item)
-    {
-        //set smelted name when smelt name is set
-        if (item.CompareTo("scrap") == 0)
+        else
         {
-            smeltedItemName = "metal";
+            furnaceStatusText.text = "Status: Idle";
         }
-        UpdateText(1);
-    }
-    public void SetPaused(bool paused)
-    {
-        this.paused = paused;
+        updateText = false;
     }
 }
