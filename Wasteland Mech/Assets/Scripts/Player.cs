@@ -3,25 +3,19 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : Character
 {
     //scripts
     private World scriptW = null;
 
     //player
-    public byte health = 100;
     public float moveX = 0;
     public float moveY = 0;
-    private Rigidbody playerRigidbody = null;
-    public float meleeTime = 3;
-    public bool melee = false;
-    private bool jumped = false;
     private GameObject playerRaycastPoint = null;
-    private bool move = false;
-    public byte harvestRate = 1;
     public byte buildingSelected = 0;
     public GameObject buildingGameObject = null;
     private GameObject playerDropSpot = null;
+    public float conditionUpdateTime = 1;
 
     //camera's
     private Camera playerCamera;
@@ -53,8 +47,7 @@ public class Player : MonoBehaviour
 
     //inventory
     public GameObject reachableObject = null;
-    public string[] inventorySlot = null;
-    public byte[] inventorySize = null;
+    
     public sbyte slotSelected = -1;
 
     public int frameRate = 0;
@@ -63,15 +56,14 @@ public class Player : MonoBehaviour
     //runs before awake
     private void Awake()
     {
-        //have to size arrays after initialization
-        inventorySlot = new string[4];
-        inventorySize = new byte[4];
+        //disable VR asset until game is more complete
+        //GameObject.Find("OVRCameraRig").SetActive(false);
+
+        //set rigidbody and health (will expand later)
+        CharacterSetUp();
 
         //scripts
         scriptW = GameObject.Find("world").GetComponent<World>();
-
-        //player
-        playerRigidbody = GameObject.Find("player").GetComponent<Rigidbody>();
         playerRaycastPoint = GameObject.Find("playerRaycastPoint");
         playerDropSpot = GameObject.Find("playerDropSpot");
 
@@ -113,6 +105,10 @@ public class Player : MonoBehaviour
             inventorySlot[i] = "";
             inventorySize[i] = 0;
         }
+
+        //set conditons
+        playerFood.text = food.ToString() + "%";
+        playerWater.text = water.ToString() + "%";
     }
     //updates once per frame
     void Update()
@@ -158,15 +154,30 @@ public class Player : MonoBehaviour
             meleeTime = 3;
         }
 
+        //food + water updater
+        if (conditionUpdateTime <= 0)
+        {
+            UpdateCondition();
+
+            //update UI
+            playerFood.text = food.ToString() + "%";
+            playerWater.text = water.ToString() + "%";
+            conditionUpdateTime = 1;
+        }
+        else
+        {
+            conditionUpdateTime -= Time.deltaTime;
+        }
+
         //frame rate (not sure how accurate it is)
         frameRate = (int)(Time.frameCount / Time.time);
         avgFrameRateText.text = frameRate.ToString() + " FPS";
     }
     //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
-    void FixedUpdate()
-    {
+    //void FixedUpdate()
+    //{
 
-    }
+    //}
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
     //player movement and interaction
     public void Movement()
@@ -365,7 +376,7 @@ public class Player : MonoBehaviour
         {
             if (jumped == false)
             {
-                playerRigidbody.AddForce(Vector3.up * 8000);
+                characterRigidbody.AddForce(Vector3.up * 8000);
                 jumped = true;
             }
         }
@@ -997,11 +1008,11 @@ public class Player : MonoBehaviour
     {
 
     }
-    public byte GetHealth()
+    public float GetHealth()
     {
         return health;
     }
-    public void SetHealth(byte health)
+    public void SetHealth(float health)
     {
         this.health = health;
     }
@@ -1015,8 +1026,8 @@ public class Player : MonoBehaviour
     }
     public void SetInventory(byte slot, string name, byte amount)
     {
-        this.inventorySlot[slot] = name;
-        this.inventorySize[slot] = amount;
+        inventorySlot[slot] = name;
+        inventorySize[slot] = amount;
         return;
     }
 }

@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 
-public class SolarPower : MonoBehaviour
+public class SolarPower : Power
 {
-    public bool isEnabled = false;
     public bool sunHitting = false;
-    public float power = 0;
 
     // Update is called once per frame
     void Update()
@@ -15,10 +13,5 @@ public class SolarPower : MonoBehaviour
             power += Time.deltaTime;
         }
 
-    }
-
-    public void SetEnabled(bool status)
-    {
-        isEnabled = status;
     }
 }

@@ -10,9 +10,9 @@ public class World : MonoBehaviour
     public GameObject playerGameObject = null;
     
     //Power
-    public byte solarCount = 0;
-    public byte generatorCount = 0;
-    public byte furnaceCount = 0;
+    public int solarCount = 0;
+    public int generatorCount = 0;
+    public int furnaceCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
     public List<GameObject> craftingObjects = new List<GameObject>();
     public bool solarEnabled = false;
@@ -97,11 +97,11 @@ public class World : MonoBehaviour
         return;
     }
 
-    public byte GetSolarCount()
+    public int GetSolarCount()
     {
         return solarCount;
     }
-    public byte GetFurnaceCount()
+    public int GetFurnaceCount()
     {
         return furnaceCount;
     }
@@ -303,7 +303,7 @@ class playerData //player data
     public float playerZ = 0;
     public float playerRoataion = 0;
     public float playerCameraRotation = 0;
-    public byte health = 0;
+    public float health = 0;
 }
 [Serializable]
 class playerInventoryData // player's inventory
@@ -319,8 +319,8 @@ class worldData //world data
     public float sunZ = 0;
     public float sunRotation = 0;
     public float time = 0;
-    public byte solarCount = 0;
-    public byte generatorCount = 0;
+    public int solarCount = 0;
+    public int generatorCount = 0;
 }
 
 [Serializable]

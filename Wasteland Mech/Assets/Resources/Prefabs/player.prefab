@@ -208,8 +208,8 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 'Health: 100'
 --- !u!1 &1220138283
@@ -675,8 +675,8 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 'Food: 100%'
 --- !u!1 &1966734163
@@ -753,8 +753,8 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 'Water: 100%'
 --- !u!1 &1066569971592138
@@ -910,13 +910,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 100
-  moveX: 0
-  moveY: 0
+  characterRigidbody: {fileID: 0}
   meleeTime: 3
   melee: 0
+  jumped: 0
+  move: 0
   harvestRate: 1
+  food: 0
+  water: 0
+  inventorySlot: []
+  inventorySize: 
+  moveX: 0
+  moveY: 0
   buildingSelected: 0
   buildingGameObject: {fileID: 0}
+  conditionUpdateTime: 1
   playerDrop: {fileID: 0}
   enableMovement: 1
   enableInventory: 0
@@ -924,8 +932,6 @@ MonoBehaviour:
   enableBuild: 0
   methodKeyHit: 0
   reachableObject: {fileID: 0}
-  inventorySlot: []
-  inventorySize: 
   slotSelected: -1
   frameRate: 0
   avgFrameRateText: {fileID: 0}
