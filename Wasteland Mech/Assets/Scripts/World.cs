@@ -15,6 +15,7 @@ public class World : MonoBehaviour
     public int furnaceCount = 0;
     public List<GameObject> powerSources = new List<GameObject>();
     public List<GameObject> craftingObjects = new List<GameObject>();
+    public List<GameObject> refiningObjects = new List<GameObject>();
     public bool solarEnabled = false;
 
     //Pause
@@ -109,13 +110,13 @@ public class World : MonoBehaviour
     {
         return furnaceCount;
     }
-    public void AddCraftingObject(GameObject craftObj)
+    public void AddRefiningObject(GameObject refiningObject)
     {
         //add crafting object/device to 
-        craftingObjects.Add(craftObj);
+        refiningObjects.Add(refiningObject);
 
         //add furnace to list
-        if (craftObj.name.Contains("furnace"))
+        if (refiningObject.name.Contains("furnace"))
         {
             furnaceCount++;
         }

@@ -57,15 +57,25 @@ public class Schematic : BuildingRequirements
         {
             Destroy(gameObject.GetComponent<Schematic>());
 
+            //solar
             if (gameObject.name.Contains("solar_panel"))
             {
                 gameObject.AddComponent<SolarPower>();
                 gameObject.tag = "power";
+                foreach (Transform child in gameObject.transform)
+                {
+                    child.gameObject.tag = "power";
+                }
             }
+            //generator
             else if (gameObject.name.Contains("generator"))
             {
                 gameObject.AddComponent<Generator>();
                 gameObject.tag = "power";
+                foreach (Transform child in gameObject.transform)
+                {
+                    child.gameObject.tag = "power";
+                }
             }
             
         }

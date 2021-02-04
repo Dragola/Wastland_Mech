@@ -12,6 +12,7 @@ TagManager:
   - power
   - mineableResource
   - schematic
+  - refining
   layers:
   - Default
   - TransparentFX

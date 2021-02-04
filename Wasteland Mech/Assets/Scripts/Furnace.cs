@@ -12,6 +12,9 @@ public class Furnace : Refine
     // Start is called before the first frame update
     void Start()
     {
+        //sets the tag of the gameobject
+        gameObject.tag = "refining";
+
         //find UI Text's
         furnaceNameText = GameObject.Find("furnaceNameText").GetComponent<Text>();
         furnaceSmeltText = GameObject.Find("furnaceSmeltText").GetComponent<Text>();

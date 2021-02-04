@@ -330,8 +330,8 @@ public class Player : Character
                     Debug.Log("No room for resource");
                 }
             }
-            //crafting interaction
-            else if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
+            //crafting/refining interaction
+            else if (reachableObject != null && (reachableObject.tag.CompareTo("crafting") == 0 || reachableObject.tag.CompareTo("refining") == 0))
             {
                 //furnace
                 if (reachableObject.name.Contains("furnaceBody") && InventoryLocateItem("scrap") != 5)
@@ -352,7 +352,7 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.R))
         {
             //crafting interaction
-            if (reachableObject != null && (reachableObject.tag.CompareTo("crafting") == 0 || reachableObject.tag.CompareTo("schematic") == 0))
+            if (reachableObject != null && (reachableObject.tag.CompareTo("refining") == 0 || reachableObject.tag.CompareTo("schematic") == 0))
             {
                 //check if player can get resource from furnace (free/existing slot)
                 if (reachableObject.name.Contains("furnaceBody") && OpenInventorySlot(reachableObject.GetComponentInParent<Furnace>().GetRefinedName()))
@@ -838,9 +838,26 @@ public class Player : Character
             {
                 child.gameObject.layer = 0;
             }
-            
-            //add schematic to building
-            buildingGameObject.AddComponent<Schematic>();
+            //solar
+            if(buildingSelected == 1)
+            {
+                //add power source to list
+                scriptW.AddPowerSource(buildingGameObject);
+                //add schematic to building
+                buildingGameObject.AddComponent<Schematic>();
+            }
+            //generator
+            else if (buildingSelected == 2)
+            {
+                scriptW.AddPowerSource(buildingGameObject);
+                //add schematic to building
+                buildingGameObject.AddComponent<Schematic>();
+            }
+            //furnace
+            else if (buildingSelected == 3)
+            {
+                scriptW.AddRefiningObject(buildingGameObject);
+            }
             
             //null refernece so building stays in world
             buildingGameObject = null;
@@ -889,9 +906,6 @@ public class Player : Character
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "solar_panel" + scriptW.GetSolarCount();
-
-                //add power source to list
-                scriptW.AddPowerSource(buildingGameObject);
             }
             //generator
             else if (buildingSelected == 2)
@@ -899,22 +913,16 @@ public class Player : Character
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/generator") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "generator" + scriptW.GetGeneratorCount();
-
-                //add power source to list
-                scriptW.AddPowerSource(buildingGameObject);
             }
             //furnace
             else if (buildingSelected == 3)
             {
                 //spawns building, finds it, then removes(Clone) from name
-                buildingGameObject = Instantiate(Resources.Load("Prefabs/Crafting/furnace") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
+                buildingGameObject = Instantiate(Resources.Load("Prefabs/Refining/furnace") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
 
                 //set both parent name and body name (body name causeing issues with furnace interaction so now there's diff names so the rechable object doesn't point to the same furnace)
                 buildingGameObject.name = "furnace" + scriptW.GetFurnaceCount();
                 GameObject.Find("furnaceBody").name = "furnaceBody" + scriptW.GetFurnaceCount();
-
-                //sets the tag of the gameobject
-                buildingGameObject.tag = "crafting";
             }
             //set layer for object (ignores raycast so doesn't hit its self)
             buildingGameObject.layer = 2;
