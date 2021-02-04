@@ -352,7 +352,7 @@ public class Player : Character
         if (Input.GetKeyDown(KeyCode.R))
         {
             //crafting interaction
-            if (reachableObject != null && reachableObject.tag.CompareTo("crafting") == 0)
+            if (reachableObject != null && (reachableObject.tag.CompareTo("crafting") == 0 || reachableObject.tag.CompareTo("schematic") == 0))
             {
                 //check if player can get resource from furnace (free/existing slot)
                 if (reachableObject.name.Contains("furnaceBody") && OpenInventorySlot(reachableObject.GetComponentInParent<Furnace>().GetRefinedName()))
@@ -364,6 +364,11 @@ public class Player : Character
                     {
                         InventoryAdd(refinedItem[0], byte.Parse(refinedItem[1]));
                     }
+                }
+                //if shematic then set to complete
+                else if (reachableObject.tag.CompareTo("schematic") == 0)
+                {
+                    reachableObject.GetComponentInParent<Schematic>().SetComplete();
                 }
             }
         }
@@ -778,7 +783,7 @@ public class Player : Character
                 text = "Press e to pickup " + reachableObject.name;
             }
             //if object is for crafting
-            else if (reachableObject.tag.CompareTo("crafting") == 0)
+            else if (reachableObject.tag.CompareTo("refining") == 0)
             {
                 //furnace text
                 if (reachableObject.name.CompareTo("furnaceBody") == 0)
@@ -789,8 +794,13 @@ public class Player : Character
                 else
                 {
                     //update interation text for item/resource
-                    text = "Press e to access " + reachableObject.transform.parent.name;
+                    text = "Press e to access " + reachableObject.transform.parent.name + ".";
                 }
+            }
+            //if object is a building schematic
+            else if (reachableObject.tag.CompareTo("schematic") == 0)
+            {
+                text = "Press e to put resources into " + reachableObject.transform.parent.name + ".";
             }
         }
         //only update text if it's different
@@ -822,23 +832,22 @@ public class Player : Character
         //place building
         if (buildingGameObject != null && Input.GetKeyDown(KeyCode.Mouse0))
         {
-            //add schematic to object
-            buildingGameObject.AddComponent<Schematic>();
-
             //set layers for object- raycast can hit
             buildingGameObject.layer = 0;
             foreach (Transform child in buildingGameObject.transform)
             {
                 child.gameObject.layer = 0;
             }
+            
+            //add schematic to building
+            buildingGameObject.AddComponent<Schematic>();
+            
             //null refernece so building stays in world
             buildingGameObject = null;
-
-
         }
         //select solar panel
         if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
+        {     
             //if not the same building then destroy and null for new one
             if (buildingSelected != 1)
             {
@@ -847,6 +856,7 @@ public class Player : Character
             }
             buildingSelected = 1;
         }
+
         //select generator
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
@@ -880,18 +890,18 @@ public class Player : Character
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/solar_panel") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
                 buildingGameObject.name = "solar_panel" + scriptW.GetSolarCount();
 
-                //sets the tag of the gameobject
-                buildingGameObject.tag = "power";
+                //add power source to list
+                scriptW.AddPowerSource(buildingGameObject);
             }
             //generator
             else if (buildingSelected == 2)
             {
                 //spawns building, finds it, then removes (Clone) from name
                 buildingGameObject = Instantiate(Resources.Load("Prefabs/Power/generator") as GameObject, new Vector3(0, -100, 0), Quaternion.identity);
-                buildingGameObject.name = "generator" + scriptW.GetSolarCount();
+                buildingGameObject.name = "generator" + scriptW.GetGeneratorCount();
 
-                //sets the tag of the gameobject
-                buildingGameObject.tag = "power";
+                //add power source to list
+                scriptW.AddPowerSource(buildingGameObject);
             }
             //furnace
             else if (buildingSelected == 3)

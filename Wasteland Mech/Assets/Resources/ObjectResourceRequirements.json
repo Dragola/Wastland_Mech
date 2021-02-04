@@ -1,26 +1,22 @@
 {
-   "Solar Panel": [
+   "SolarPanel": [
       {
-         "Resource": "Glass",
-         "Amount": 6
+         "resource": "Glass",
+         "amount": 6
       },
       {
-         "Resource": "Metal",
-         "Amount": 4
+         "resource": "Metal",
+         "amount": 4
       },
       {
-         "Resource": "Circuits",
-         "Amount": 1
+         "resource": "Circuits",
+         "amount": 1
       }
    ],
    "Generator": [
       {
-         "Resource": "Metal",
-         "Amount": 10
-      },
-      {
-         "Resource": "Circuits",
-         "Amount": 1
+         "resource": "Metal",
+         "amount": 10
       }
    ]
 }

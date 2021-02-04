@@ -11,6 +11,7 @@ TagManager:
   - IgnoreRay
   - power
   - mineableResource
+  - schematic
   layers:
   - Default
   - TransparentFX

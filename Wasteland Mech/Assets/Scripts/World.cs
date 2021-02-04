@@ -101,6 +101,10 @@ public class World : MonoBehaviour
     {
         return solarCount;
     }
+    public int GetGeneratorCount()
+    {
+        return generatorCount;
+    }
     public int GetFurnaceCount()
     {
         return furnaceCount;
