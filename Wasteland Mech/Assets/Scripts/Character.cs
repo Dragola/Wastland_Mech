@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
+    public byte characterType = 0;
     public float health = 0;
     public Rigidbody characterRigidbody = null;
     public float meleeTime = 3;
@@ -16,28 +17,34 @@ public class Character : MonoBehaviour
 
     //inventory
     public string[] inventorySlot = null;
-    public byte[] inventorySize = null;
+    public byte[] inventorySlotSize = null;
+    public byte inventorySize = 4;
+    public bool hasBackpack = false;
 
-    public void CharacterSetUp()
+    public void CharacterSetUp(byte characterType)
     {
         //get rigidbody component from character
         characterRigidbody = gameObject.GetComponent<Rigidbody>();
         
-        //
-        if (gameObject.name.CompareTo("player") == 0)
+        //set character type
+        this.characterType = characterType;
+
+        //player
+        if (characterType == 0)
         {
             health = 100;
-            food = 100f;
-            water = 100f;
         }
-        else
+        //normal person
+        else if( characterType == 1)
         {
             health = 50;
         }
+        food = 100f;
+        water = 100f;
 
-        //have to size arrays after initialization
-        inventorySlot = new string[4];
-        inventorySize = new byte[4];
+        //set array size
+        inventorySlot = new string[16];
+        inventorySlotSize = new byte[16];
     }
     public void UpdateCondition()
     {

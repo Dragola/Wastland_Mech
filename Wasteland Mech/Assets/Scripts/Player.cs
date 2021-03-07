@@ -19,16 +19,11 @@ public class Player : Character
 
     //camera's
     private Camera playerCamera;
-    private bool firstPersonCamera = true;
 
     //UI components
     private Text playerHealth = null;
     private Text playerFood = null;
     private Text playerWater = null;
-    private Button playerSlot0 = null;
-    private Button playerSlot1 = null;
-    private Button playerSlot2 = null;
-    private Button playerSlot3 = null;
     public Button playerDrop = null;
     private Text playerInteractText = null;
     private Text playerModeText = null;
@@ -38,18 +33,19 @@ public class Player : Character
 
     //bool aim = false;
 
-    //movement and inventory
+    //movement and menu's
     public bool enableMovement = true;
-    public bool enableInventory = false;
     public bool enablePause = false;
     public bool enableBuild = false;
     public bool methodKeyHit = false;
 
     //inventory
+    public bool enableInventory = false;
     public GameObject reachableObject = null;
-    
     public sbyte slotSelected = -1;
+    public Button[] inventoryButtons = null;
 
+    //framerate
     public int frameRate = 0;
     public Text avgFrameRateText = null;
 
@@ -60,7 +56,11 @@ public class Player : Character
         //GameObject.Find("OVRCameraRig").SetActive(false);
 
         //set rigidbody and health (will expand later)
-        CharacterSetUp();
+        CharacterSetUp(0);
+
+        //inventory buttons
+        inventoryButtons = new Button[16];
+        InventoryButtonLayout();
 
         //scripts
         scriptW = GameObject.Find("world").GetComponent<World>();
@@ -74,10 +74,6 @@ public class Player : Character
         playerHealth = GameObject.Find("playerHealth").GetComponent<Text>();
         playerFood = GameObject.Find("playerFood").GetComponent<Text>();
         playerWater = GameObject.Find("playerWater").GetComponent<Text>();
-        playerSlot0 = GameObject.Find("playerSlot0").GetComponent<Button>();
-        playerSlot1 = GameObject.Find("playerSlot1").GetComponent<Button>();
-        playerSlot2 = GameObject.Find("playerSlot2").GetComponent<Button>();
-        playerSlot3 = GameObject.Find("playerSlot3").GetComponent<Button>();
         playerDrop = GameObject.Find("playerDrop").GetComponent<Button>();
         playerInteractText = GameObject.Find("playerInteract").GetComponent<Text>();
         playerModeText = GameObject.Find("playerMode").GetComponent<Text>();
@@ -103,7 +99,7 @@ public class Player : Character
         for (byte i = 0; i < inventorySlot.Length; i++)
         {
             inventorySlot[i] = "";
-            inventorySize[i] = 0;
+            inventorySlotSize[i] = 0;
         }
 
         //set conditons
@@ -341,11 +337,11 @@ public class Player : Character
                     byte slot = InventoryLocateItem("scrap");
 
                     //add scrap to furnace
-                    reachableObject.GetComponentInParent<Furnace>().AddRefineItem("scrap", inventorySize[slot]);
+                    reachableObject.GetComponentInParent<Furnace>().AddRefineItem("scrap", inventorySlotSize[slot]);
 
                     //remove scrap from inventory and update inventory
-                    inventorySize[slot] = 0;
-                    InventoryUpdate(slot);
+                    inventorySlotSize[slot] = 0;
+                    InventoryUpdate();
                 }
             }
         }
@@ -395,18 +391,6 @@ public class Player : Character
         {
             Debug.Log("Aim not implemented yet :(");
         }
-        //first person
-        if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == false)
-        {
-            //playerRigidbody.GetComponent<MeshRenderer>().enabled = false;
-            firstPersonCamera = true;
-        }
-        //third person 
-        else if (Input.GetKeyDown(KeyCode.Tab) && firstPersonCamera == true)
-        {
-            //playerRigidbody.GetComponent<MeshRenderer>().enabled = true;
-            firstPersonCamera = false;
-        }
         //speed up
         if (Input.GetKeyDown(KeyCode.KeypadPlus))
         {
@@ -434,9 +418,20 @@ public class Player : Character
         {
             PauseGame();
         }
+        //backpack upgrade
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            if (hasBackpack == false) {
+                BackpackStatus(true);
+            }
+            else
+            {
+                BackpackStatus(false);
+            }
 
-        //raycast for interaction (disabled if in build mode)
-        if (move && enableBuild == false)
+        }
+            //raycast for interaction (disabled if in build mode)
+            if (move && enableBuild == false)
         {
             //interaction
             if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, (float)1.5))
@@ -520,108 +515,19 @@ public class Player : Character
     }
 
     //checks for update on inventory slot
-    public void InventoryUpdate(byte slot)
+    public void InventoryUpdate()
     {
-        if (slot == 0)
+        //update all texts for range of inventorySize
+        for (int i = 0; i < inventorySize; i++)
         {
-            //if slot has item
-            if (inventorySize[0] > 0)
+            //if the button is there
+            if (inventoryButtons[i] != null)
             {
-                //enables button if inventory slot has item
-                if (playerSlot0.enabled == false)
-                {
-                    playerSlot0.enabled = true;
-                }
-                //update slot
-                playerSlot0.GetComponentInChildren<Text>().text = "" + inventorySlot[0] + "x" + inventorySize[0];
+                inventoryButtons[i].GetComponentInChildren<Text>().text = inventorySlot[i] + " x " + inventorySlotSize[i];
             }
             else
             {
-                //enables button if inventory slot has item
-                if (playerSlot0.enabled == true)
-                {
-                    playerSlot0.enabled = false;
-                }
-
-                inventorySlot[0] = "";
-                //update slot
-                playerSlot0.GetComponentInChildren<Text>().text = "";
-            }
-
-        }
-        else if (slot == 1)
-        {
-            //if slot has item
-            if (inventorySize[1] > 0)
-            {
-                //enables button if inventory slot has item
-                if (playerSlot1.enabled == false)
-                {
-                    playerSlot1.enabled = true;
-                }
-                //update slots text with item and amount
-                playerSlot1.GetComponentInChildren<Text>().text = "" + inventorySlot[1] + "x" + inventorySize[1];
-            }
-            else
-            {
-                //enables button if inventory slot has item
-                if (playerSlot1.enabled == true)
-                {
-                    playerSlot1.enabled = false;
-                }
-                inventorySlot[1] = "";
-                //update slots text with item and amount
-                playerSlot1.GetComponentInChildren<Text>().text = "";
-            }
-        }
-        else if (slot == 2)
-        {
-            //if slot has item
-            if (inventorySize[2] > 0)
-            {
-                //enables button if inventory slot has item
-                if (playerSlot2.enabled == false)
-                {
-                    playerSlot2.enabled = true;
-                }
-                //update slots text with item and amount
-                playerSlot2.GetComponentInChildren<Text>().text = "" + inventorySlot[2] + "x" + inventorySize[2];
-            }
-            else
-            {
-                //enables button if inventory slot has item
-                if (playerSlot2.enabled == true)
-                {
-                    playerSlot2.enabled = false;
-                }
-                inventorySlot[2] = "";
-                //update slots text with item and amount
-                playerSlot2.GetComponentInChildren<Text>().text = "";
-            }
-        }
-        else if (slot == 3)
-        {
-            //if slot has item
-            if (inventorySize[3] > 0)
-            {
-                //enables button if inventory slot has item
-                if (playerSlot3.enabled == false)
-                {
-                    playerSlot3.enabled = true;
-                }
-                //update slots text with item and amount
-                playerSlot3.GetComponentInChildren<Text>().text = "" + inventorySlot[3] + "x" + inventorySize[3];
-            }
-            else
-            {
-                //enables button if inventory slot has item
-                if (playerSlot3.enabled == true)
-                {
-                    playerSlot3.enabled = false;
-                }
-                inventorySlot[3] = "";
-                //update slots text with item and amount
-                playerSlot3.GetComponentInChildren<Text>().text = "";
+                Debug.Log("inventoryButton[" + i + "] == null");
             }
         }
         return;
@@ -644,11 +550,11 @@ public class Player : Character
             }
 
             //add to existing slot
-            else if (inventorySlot[i].CompareTo(item) == 0 && (inventorySize[i] + num) != 100)
+            else if (inventorySlot[i].CompareTo(item) == 0 && (inventorySlotSize[i] + num) != 100)
             {
                 slotFound = true;
-                inventorySize[i] += num;
-                InventoryUpdate(i);
+                inventorySlotSize[i] += num;
+                InventoryUpdate();
             }
         }
 
@@ -656,8 +562,8 @@ public class Player : Character
         if (slotFound == false && firstFreeSlot != -1)
         {
             inventorySlot[firstFreeSlot] = item;
-            inventorySize[firstFreeSlot] += num;
-            InventoryUpdate((byte)firstFreeSlot);
+            inventorySlotSize[firstFreeSlot] += num;
+            InventoryUpdate();
         }
         return;
     }
@@ -667,39 +573,15 @@ public class Player : Character
     {
         string buttonName = EventSystem.current.currentSelectedGameObject.name;
 
-        //selects the inventory slot and enables the drop button
-        if (buttonName.CompareTo("playerSlot0") == 0)
-        {
-            slotSelected = 0;
-
-            playerDrop.gameObject.SetActive(true);
-        }
-        else if (buttonName.CompareTo("playerSlot1") == 0)
-        {
-            slotSelected = 1;
-
-            playerDrop.gameObject.SetActive(true);
-        }
-        else if (buttonName.CompareTo("playerSlot2") == 0)
-        {
-            slotSelected = 2;
-            playerDrop.gameObject.SetActive(true);
-        }
-        else if (buttonName.CompareTo("playerSlot3") == 0)
-        {
-            slotSelected = 3;
-            playerDrop.gameObject.SetActive(true);
-        }
-
         //drop the item that was selected
-        else if (buttonName.CompareTo("playerDrop") == 0)
+        if (buttonName.CompareTo("playerDrop") == 0)
         {
-            if (slotSelected != -1 && inventorySize[slotSelected] > 0)
+            if (slotSelected != -1 && inventorySlotSize[slotSelected] > 0)
             {
                 GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventorySlot[slotSelected]))), playerDropSpot.transform.position, Quaternion.identity.normalized);
                 item.name = inventorySlot[slotSelected];
-                inventorySize[slotSelected]--;
-                InventoryUpdate((byte)slotSelected);
+                inventorySlotSize[slotSelected]--;
+                InventoryUpdate();
             }
         }
     }
@@ -733,10 +615,10 @@ public class Player : Character
         bool openSlot = false;
 
         //check slots
-        for (byte i = 0; i < inventorySize.Length && openSlot == false; i++)
+        for (byte i = 0; i < inventorySlotSize.Length && openSlot == false; i++)
         {
             //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
-            if (inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySize[i] < 100))
+            if (inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySlotSize[i] < 100))
             {
                 openSlot = true;
             }
@@ -751,7 +633,7 @@ public class Player : Character
         byte slot = 5;
 
         //check slots
-        for (byte i = 0; i < inventorySize.Length; i++)
+        for (byte i = 0; i < inventorySlotSize.Length; i++)
         {
             if (inventorySlot[i].CompareTo(resource) == 0)
             {
@@ -1045,12 +927,86 @@ public class Player : Character
     }
     public byte GetinventoryAmount(byte slot)
     {
-        return inventorySize[slot];
+        return inventorySlotSize[slot];
     }
     public void SetInventory(byte slot, string name, byte amount)
     {
         inventorySlot[slot] = name;
-        inventorySize[slot] = amount;
+        inventorySlotSize[slot] = amount;
         return;
+    }
+    public void BackpackStatus(bool pickedUp)
+    {
+        //picked up backpack
+        if (pickedUp == true && hasBackpack == false)
+        {
+            hasBackpack = true;
+        }
+        //dropped backpack
+        else if (pickedUp == false && hasBackpack == true)
+        {
+            hasBackpack = false;
+        }
+    }
+    public void InventoryButtonLayout()
+    {
+        int startingX = -790;
+        int startingY = -490;
+        //create number of buttons for inventorySize and set their respective text's
+        for(byte i = 0; i < inventorySize; i++)
+        {
+            //spawn button
+            GameObject button = Instantiate((GameObject)Resources.Load("Prefabs/Player/inventoryButton"));        
+            
+            //set parent
+            button.transform.SetParent(GameObject.Find("playerInventoryUI").GetComponent<Transform>(), false);
+
+            //set scale
+            button.transform.localScale = new Vector3(1, 1, 1);
+
+            //set position of first 4 buttons
+            if (i < 4)
+            {
+                //set position based on the total number of inventory slots
+                button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
+            }
+            else if( i < 8)
+            {
+                //set position based on the total number of inventory slots
+                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
+            }
+            else
+            {
+                //set position based on the total number of inventory slots
+                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
+            }
+
+            //this is unique to each button
+            byte buttonNumber = i;
+
+            //set button name
+            button.name = "inventoryButton" + buttonNumber;
+
+            //reference the button compenent
+            Button buttonComponent = button.GetComponentInChildren<Button>();
+            
+            //add listener to button
+            buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
+
+            //set button in array
+            inventoryButtons[i] = buttonComponent;
+        }
+    }
+    void ButtonClicked(byte buttonNumber)
+    {
+        Debug.Log("Button hit = " + buttonNumber);
+        
+        //set slotSelected
+        slotSelected = Convert.ToSByte(buttonNumber);
+        
+        //make drop button visible
+        playerDrop.gameObject.SetActive(true);
+
+        InventoryButton();
     }
 }

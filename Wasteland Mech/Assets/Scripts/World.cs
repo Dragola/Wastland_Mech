@@ -162,7 +162,7 @@ public class World : MonoBehaviour
             {
                 Debug.Log("Adding inventory slot " + i + "= " + slot.slotItem + "x" + slot.slotAmount);
                 playerGameObject.GetComponent<Player>().SetInventory(i, slot.slotItem, slot.slotAmount);
-                playerGameObject.GetComponent<Player>().InventoryUpdate(i);
+                playerGameObject.GetComponent<Player>().InventoryUpdate();
                 i++;
             }
 
