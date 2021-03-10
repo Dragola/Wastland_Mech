@@ -21,7 +21,7 @@ public class Character : MonoBehaviour
     public byte inventorySize = 4;
     public bool hasBackpack = false;
 
-    public void CharacterSetUp(byte characterType)
+    public void CharacterSetUp(bool isPlayer, byte characterType)
     {
         //get rigidbody component from character
         characterRigidbody = gameObject.GetComponent<Rigidbody>();
@@ -29,16 +29,21 @@ public class Character : MonoBehaviour
         //set character type
         this.characterType = characterType;
 
-        //player
-        if (characterType == 0)
+        //if player
+        if (isPlayer)
         {
             health = 100;
         }
-        //normal person
-        else if( characterType == 1)
+        //if not player
+        else
         {
-            health = 50;
+            //normal NPC (civilian)
+            if (characterType == 0)
+            {
+
+            }
         }
+        //set initial health and water
         food = 100f;
         water = 100f;
 
@@ -46,13 +51,39 @@ public class Character : MonoBehaviour
         inventorySlot = new string[16];
         inventorySlotSize = new byte[16];
     }
-    public void UpdateCondition()
+    public void UpdateFood(bool ateFood, float amount)
     {
-        food -= 0.01f;
-        water -= 0.01f;
+        //if character ate food then increase food
+        if (ateFood)
+        {
+            food += amount;
+        }
+        //if character didn't eat food then decrease food
+        else
+        {
+            food -= amount;
+        }
+        
     }
-    public void UpdateHealth(float damage)
+    public void UpdateWater(bool drankWater, float amount)
     {
-        health -= damage;
+        //if character had water then increase water
+        if (drankWater)
+        {
+            water += amount;
+        }
+        //if character didn't drink water then decrease water
+        else
+        {
+            water -= amount;
+        }
+    }
+    public void UpdateHealth(bool wasHurt, bool wasHealed, float amount)
+    {
+        //if character was hurt then update health
+        if (wasHurt)
+        {
+            health -= amount;
+        }
     }
 }

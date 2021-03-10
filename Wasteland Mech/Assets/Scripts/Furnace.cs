@@ -9,7 +9,7 @@ public class Furnace : Refine
     private Text furnaceSmeltedText = null;
     private Text furnaceStatusText = null;
 
-    // Start is called before the first frame update
+    //---------------------------------------------------------------------------------Start Function
     void Start()
     {
         //sets the tag of the gameobject
@@ -34,7 +34,7 @@ public class Furnace : Refine
         updateText = true;
     }
 
-    // Update is called once per frame
+    //---------------------------------------------------------------------------------Update Function
     void Update()
     {
         //if game is not paused then smelt
@@ -86,7 +86,7 @@ public class Furnace : Refine
             }
         }
     }
-
+    //---------------------------------------------------------------------------------UI Update Functions
     private void UpdateText()
     {
         //if there is at least 1 refine or refined item

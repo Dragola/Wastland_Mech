@@ -23,7 +23,8 @@ public class Refine : MonoBehaviour
     public byte SMELTED_MAX = 100;
 
     public bool updateText = false;
-    
+
+    //---------------------------------------------------------------------------------Add Function
     public void AddRefineItem(string itemName, byte numberItems)
     {
         //same item
@@ -42,11 +43,12 @@ public class Refine : MonoBehaviour
             //UpdateText(0);
 
             //set and update text for smelted item
-            ///SetSmeltedName(smeltItemName);
+            //SetSmeltedName(smeltItemName);
         }
         //indicate to update text
         updateText = true;
     }
+    //---------------------------------------------------------------------------------Update Function
     public void UpdateStatus(bool status)
     {
         //disable smelting
@@ -62,6 +64,7 @@ public class Refine : MonoBehaviour
         //set the refined name
         SetRefinedName();
     }
+    //---------------------------------------------------------------------------------Get/Set Functions
     public string GetRefinedItem()
     {
         string smelted = refinedItemName + "," + refinedItemNum;

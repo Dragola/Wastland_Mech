@@ -25,6 +25,7 @@ public class World : MonoBehaviour
     GameObject sun = null;
     public float dayDuration = 3600;
 
+    //---------------------------------------------------------------------------------Awake Function
     private void Awake()
     {
         //sun
@@ -34,7 +35,7 @@ public class World : MonoBehaviour
         playerGameObject = GameObject.Find("player");
     }
 
-    // Update is called once per frame (60fps = 60calls)
+    //---------------------------------------------------------------------------------Update Function
     void Update()
     {
         //if game isn't paused
@@ -63,7 +64,7 @@ public class World : MonoBehaviour
             }
         }
     }
-    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Solar Power
+    //---------------------------------------------------------------------------------Power Functions
     public void AddPowerSource(GameObject powerSource)
     {
         //increase solar count
@@ -97,7 +98,7 @@ public class World : MonoBehaviour
         powerSources.Remove(powerDevice);
         return;
     }
-
+    //---------------------------------------------------------------------------------Power Get Functions
     public int GetSolarCount()
     {
         return solarCount;
@@ -110,6 +111,7 @@ public class World : MonoBehaviour
     {
         return furnaceCount;
     }
+    //---------------------------------------------------------------------------------Refining Function
     public void AddRefiningObject(GameObject refiningObject)
     {
         //add crafting object/device to 
@@ -122,7 +124,9 @@ public class World : MonoBehaviour
         }
         return;
     }
-    public void SaveGame() // save game
+    //---------------------------------------------------------------------------------Save/Load Function
+    //save game
+    public void SaveGame()
     {
         //save object
         SaveData save = CreateSaveObject();
@@ -138,8 +142,8 @@ public class World : MonoBehaviour
         file.Close();
         return;
     }
-
-    public void LoadGame() // load game
+    //load game
+    public void LoadGame()
     {
         //if there is a save file
         if (File.Exists(Application.persistentDataPath + "/save.save"))
@@ -201,6 +205,7 @@ public class World : MonoBehaviour
         }
         return;
     }
+    //creates save data
     private SaveData CreateSaveObject() //makes save file
     {
         SaveData save = new SaveData();
@@ -267,6 +272,7 @@ public class World : MonoBehaviour
         //resource data
         return save;
     }
+    //---------------------------------------------------------------------------------Game Status Functions
     public void PauseWorld()
     {
         paused = true;
@@ -290,7 +296,7 @@ public class World : MonoBehaviour
         }
     }
 }
-
+//---------------------------------------------------------------------------------Save Data Classes
 [Serializable]
 class SaveData //main save
 {

@@ -49,16 +49,16 @@ public class Player : Character
     public int frameRate = 0;
     public Text avgFrameRateText = null;
 
-    //runs before awake
+    //---------------------------------------------------------------------------------Awake Function
     private void Awake()
     {
         //disable VR asset until game is more complete
         //GameObject.Find("OVRCameraRig").SetActive(false);
 
-        //set rigidbody and health (will expand later)
-        CharacterSetUp(0);
+        //set player up
+        CharacterSetUp(true, 0);
 
-        //inventory buttons
+        //inventory button setup
         inventoryButtons = new Button[16];
         InventoryButtonLayout();
 
@@ -82,7 +82,7 @@ public class Player : Character
         playerOptionsUI = GameObject.Find("playerOptionsUI").GetComponent<Canvas>();
         avgFrameRateText = GameObject.Find("playerFPS").GetComponent<Text>();
     }
-    // Use this for initialization
+    //---------------------------------------------------------------------------------Start Function
     void Start()
     {
         //Cursor set initial state (invisible + locked to prevent going off screen)
@@ -106,7 +106,7 @@ public class Player : Character
         playerFood.text = food.ToString() + "%";
         playerWater.text = water.ToString() + "%";
     }
-    //updates once per frame
+    //---------------------------------------------------------------------------------Update Function
     void Update()
     {
         //gets's mouse input
@@ -153,13 +153,9 @@ public class Player : Character
         //food + water updater
         if (conditionUpdateTime <= 0)
         {
-            UpdateCondition();
-
-            //update UI
-            playerFood.text = food.ToString() + "%";
-            playerWater.text = water.ToString() + "%";
-            conditionUpdateTime = 1;
+            ConditionUpdate();
         }
+        //decrease time for condition to update (1 sec countdown)
         else
         {
             conditionUpdateTime -= Time.deltaTime;
@@ -169,12 +165,45 @@ public class Player : Character
         frameRate = (int)(Time.frameCount / Time.time);
         avgFrameRateText.text = frameRate.ToString() + " FPS";
     }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ Physics and constants
-    //void FixedUpdate()
-    //{
+    //---------------------------------------------------------------------------------Physics Functions
+    void FixedUpdate()
+    {
+        RaycastHit hit;
 
-    //}
-    //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Movement/Controls
+        //raycast for interaction (disabled if in build mode)
+        if (move && enableBuild == false)
+
+            //interaction
+            if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out hit, (float)1.5))
+            {
+
+                //get interacted object if not already
+                if (reachableObject == null)
+                {
+                    reachableObject = hit.collider.gameObject;
+                }
+                //new interacted object
+                else if (reachableObject.name.CompareTo(hit.collider.gameObject.name) != 0)
+                {
+                    reachableObject = hit.collider.gameObject;
+                }
+                UpdateInteractionText();
+            }
+            //if not interacting with anything then set reachable_object to null
+            else
+            {
+                reachableObject = null;
+
+                UpdateInteractionText();
+            }
+        //if player moved and raycast hit then update (or move) building location
+        if (move && Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out hit, 10) && buildingGameObject != null)
+        {
+            //set building position
+            buildingGameObject.transform.position = hit.point;
+        }
+    }
+    //---------------------------------------------------------------------------------Player Controls
     //player movement and interaction
     public void Movement()
     {
@@ -430,33 +459,7 @@ public class Player : Character
             }
 
         }
-            //raycast for interaction (disabled if in build mode)
-            if (move && enableBuild == false)
-        {
-            //interaction
-            if (Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, (float)1.5))
-            {
 
-                //get interacted object if not already
-                if (reachableObject == null)
-                {
-                    reachableObject = hit.collider.gameObject;
-                }
-                //new interacted object
-                else if (reachableObject.name.CompareTo(hit.collider.gameObject.name) != 0)
-                {
-                    reachableObject = hit.collider.gameObject;
-                }
-                UpdateInteractionText();
-            }
-            //if not interacting with anything then set reachable_object to null
-            else
-            {
-                reachableObject = null;
-
-                UpdateInteractionText();
-            }
-        }
         //load game
         if (Input.GetKeyDown(KeyCode.L))
         {
@@ -487,7 +490,7 @@ public class Player : Character
         }
         return;
     }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory
+    //---------------------------------------------------------------------------------Inventory Functions
     //invenetory method
     private void Inventory()
     {
@@ -513,7 +516,6 @@ public class Player : Character
         }
         return;
     }
-
     //checks for update on inventory slot
     public void InventoryUpdate()
     {
@@ -532,7 +534,6 @@ public class Player : Character
         }
         return;
     }
-
     //adds item to inventory
     private void InventoryAdd(string item, byte num)
     {
@@ -567,7 +568,6 @@ public class Player : Character
         }
         return;
     }
-
     //reads which inventory button was hit
     public void InventoryButton()
     {
@@ -585,30 +585,6 @@ public class Player : Character
             }
         }
     }
-    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Resource type
-    //gets rescouce type for harvestable resource
-    private string GetHarvestableResource(string name)
-    {
-        string resource = "";
-
-        //tree
-        if (name.CompareTo("tree") == 0)
-        {
-            resource = "wood";
-        }
-        //rock
-        else if (name.CompareTo("largeRock") == 0)
-        {
-            resource = "rock";
-        }
-        //metal
-        else if (name.CompareTo("rustedMetal") == 0)
-        {
-            resource = "scrap";
-        }
-        return resource;
-    }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Space
     //check if player can collect resource (look for resource in slots that has less then 100 or open slot)
     private bool OpenInventorySlot(string resource)
     {
@@ -625,7 +601,6 @@ public class Player : Character
         }
         return openSlot;
     }
-    //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Inventory Locate
     //look for resource in players inventory
     private byte InventoryLocateItem(string resource)
     {
@@ -642,7 +617,92 @@ public class Player : Character
         }
         return slot;
     }
-    //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Interaction Text
+    //creates buttons for inventory
+    public void InventoryButtonLayout()
+    {
+        int startingX = -790;
+        int startingY = -490;
+        //create number of buttons for inventorySize and set their respective text's
+        for (byte i = 0; i < inventorySize; i++)
+        {
+            //spawn button
+            GameObject button = Instantiate((GameObject)Resources.Load("Prefabs/Player/inventoryButton"));
+
+            //set parent
+            button.transform.SetParent(GameObject.Find("playerInventoryUI").GetComponent<Transform>(), false);
+
+            //set scale
+            button.transform.localScale = new Vector3(1, 1, 1);
+
+            //set position of first 4 buttons
+            if (i < 4)
+            {
+                //set position based on the total number of inventory slots
+                button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
+            }
+            else if (i < 8)
+            {
+                //set position based on the total number of inventory slots
+                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
+            }
+            else
+            {
+                //set position based on the total number of inventory slots
+                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
+            }
+
+            //this is unique to each button
+            byte buttonNumber = i;
+
+            //set button name
+            button.name = "inventoryButton" + buttonNumber;
+
+            //reference the button compenent
+            Button buttonComponent = button.GetComponentInChildren<Button>();
+
+            //add listener to button
+            buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
+
+            //set button in array
+            inventoryButtons[i] = buttonComponent;
+        }
+    }
+    //set's the text for the inventory slot (should this be UI or Invenotory group?)
+    public void SetInventory(byte slot, string name, byte amount)
+    {
+        inventorySlot[slot] = name;
+        inventorySlotSize[slot] = amount;
+        return;
+    }
+    //used for inventory buttons when clicked
+    void ButtonClicked(byte buttonNumber)
+    {
+        Debug.Log("Button hit = " + buttonNumber);
+
+        //set slotSelected
+        slotSelected = Convert.ToSByte(buttonNumber);
+
+        //make drop button visible
+        playerDrop.gameObject.SetActive(true);
+
+        InventoryButton();
+    }
+    //---------------------------------------------------------------------------------BackPack Functions
+    // functions for backback
+    public void BackpackStatus(bool pickedUp)
+    {
+        //picked up backpack
+        if (pickedUp == true && hasBackpack == false)
+        {
+            hasBackpack = true;
+        }
+        //dropped backpack
+        else if (pickedUp == false && hasBackpack == true)
+        {
+            hasBackpack = false;
+        }
+    }
+    //---------------------------------------------------------------------------------UI Functions
     //updates text to indicate how to interact/use
     private void UpdateInteractionText()
     {
@@ -691,7 +751,7 @@ public class Player : Character
             playerInteractText.text = text;
         }
     }
-    //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------Building
+    //---------------------------------------------------------------------------------Building Functions
     //building method
     private void Building()
     {
@@ -815,13 +875,6 @@ public class Player : Character
                 child.gameObject.layer = 2;
             }
         }
-        //if player moved and raycast hit then update (or move) building location
-        if (move && Physics.Raycast(playerRaycastPoint.transform.position, playerRaycastPoint.transform.forward, out RaycastHit hit, 10) && buildingGameObject != null)
-        {
-            //set building position
-            buildingGameObject.transform.position = hit.point;
-        }
-
         //if building is spawned enabled rotation
         if (buildingGameObject != null)
         {
@@ -836,6 +889,7 @@ public class Player : Character
         }
         return;
     }
+    //---------------------------------------------------------------------------------Menu Functions
     public void QuitGame()
     {
         Application.Quit();
@@ -913,6 +967,7 @@ public class Player : Character
     {
 
     }
+    //---------------------------------------------------------------------------------Get/Set Functions
     public float GetHealth()
     {
         return health;
@@ -929,84 +984,38 @@ public class Player : Character
     {
         return inventorySlotSize[slot];
     }
-    public void SetInventory(byte slot, string name, byte amount)
+    //gets rescouce type for harvestable resource
+    private string GetHarvestableResource(string name)
     {
-        inventorySlot[slot] = name;
-        inventorySlotSize[slot] = amount;
-        return;
-    }
-    public void BackpackStatus(bool pickedUp)
-    {
-        //picked up backpack
-        if (pickedUp == true && hasBackpack == false)
+        string resource = "";
+
+        //tree
+        if (name.CompareTo("tree") == 0)
         {
-            hasBackpack = true;
+            resource = "wood";
         }
-        //dropped backpack
-        else if (pickedUp == false && hasBackpack == true)
+        //rock
+        else if (name.CompareTo("largeRock") == 0)
         {
-            hasBackpack = false;
+            resource = "rock";
         }
-    }
-    public void InventoryButtonLayout()
-    {
-        int startingX = -790;
-        int startingY = -490;
-        //create number of buttons for inventorySize and set their respective text's
-        for(byte i = 0; i < inventorySize; i++)
+        //metal
+        else if (name.CompareTo("rustedMetal") == 0)
         {
-            //spawn button
-            GameObject button = Instantiate((GameObject)Resources.Load("Prefabs/Player/inventoryButton"));        
-            
-            //set parent
-            button.transform.SetParent(GameObject.Find("playerInventoryUI").GetComponent<Transform>(), false);
-
-            //set scale
-            button.transform.localScale = new Vector3(1, 1, 1);
-
-            //set position of first 4 buttons
-            if (i < 4)
-            {
-                //set position based on the total number of inventory slots
-                button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
-            }
-            else if( i < 8)
-            {
-                //set position based on the total number of inventory slots
-                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
-            }
-            else
-            {
-                //set position based on the total number of inventory slots
-                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
-            }
-
-            //this is unique to each button
-            byte buttonNumber = i;
-
-            //set button name
-            button.name = "inventoryButton" + buttonNumber;
-
-            //reference the button compenent
-            Button buttonComponent = button.GetComponentInChildren<Button>();
-            
-            //add listener to button
-            buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
-
-            //set button in array
-            inventoryButtons[i] = buttonComponent;
+            resource = "scrap";
         }
+        return resource;
     }
-    void ButtonClicked(byte buttonNumber)
+    //---------------------------------------------------------------------------------Player's Wellbeing Functions
+    void ConditionUpdate()
     {
-        Debug.Log("Button hit = " + buttonNumber);
-        
-        //set slotSelected
-        slotSelected = Convert.ToSByte(buttonNumber);
-        
-        //make drop button visible
-        playerDrop.gameObject.SetActive(true);
+        //update food and water
+        UpdateFood(false, 0.01f);
+        UpdateWater(false, 0.01f);
 
-        InventoryButton();
+        //update UI for food and water
+        playerFood.text = food.ToString() + "%";
+        playerWater.text = water.ToString() + "%";
+        conditionUpdateTime = 1;
     }
 }
