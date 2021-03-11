@@ -616,6 +616,10 @@ public class Player : Character
     {
         int startingX = -790;
         int startingY = -490;
+
+        //for spacing out button's
+        byte spacer = 0;
+
         //create number of buttons for inventorySize and set their respective text's
         for (byte i = 0; i < inventoryButtons.Length; i++)
         {
@@ -630,22 +634,30 @@ public class Player : Character
                 //set scale
                 button.transform.localScale = new Vector3(1, 1, 1);
 
+                //reset spacer
+                if(spacer == 4) 
+                { 
+                    spacer = 0;
+                }
+
                 //set position of first 4 buttons
                 if (i < 4)
                 {
                     //set position based on the total number of inventory slots
-                    button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
+                    button.transform.localPosition = new Vector3(startingX + Math.Abs((spacer * 500)), startingY, 0);
                 }
                 else if (i < 8)
                 {
                     //set position based on the total number of inventory slots
-                    button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
+                    button.transform.localPosition = new Vector3(startingX + Math.Abs((spacer * 500)), startingY + 400, 0);
                 }
                 else
                 {
                     //set position based on the total number of inventory slots
-                    button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
+                    button.transform.localPosition = new Vector3(startingX + Math.Abs((spacer * 500)), startingY + 800, 0);
                 }
+                //increment spacer
+                spacer++;
 
                 //this is unique to each button
                 byte buttonNumber = i;
@@ -658,6 +670,8 @@ public class Player : Character
 
                 //add listener to button
                 buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
+
+                button.GetComponentInChildren<Text>().text = "Slot" + i;
 
                 //set button in array
                 inventoryButtons[i] = buttonComponent;

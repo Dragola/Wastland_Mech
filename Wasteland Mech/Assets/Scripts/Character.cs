@@ -47,7 +47,7 @@ public class Character : MonoBehaviour
         water = 100f;
 
         //set array size
-        inventory = new InventorySlotData[16];
+        inventory = new InventorySlotData[12];
 
         //set slots for inventory size
         SetInventorySize(true, inventorySize);
