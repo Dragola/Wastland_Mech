@@ -16,9 +16,8 @@ public class Character : MonoBehaviour
     public float water = 0f;
 
     //inventory
-    public string[] inventorySlot = null;
-    public byte[] inventorySlotSize = null;
-    public byte inventorySize = 4;
+    protected InventorySlotData[] inventory = null;
+    public sbyte inventorySize = 4;
     public bool hasBackpack = false;
 
     public void CharacterSetUp(bool isPlayer, byte characterType)
@@ -40,7 +39,7 @@ public class Character : MonoBehaviour
             //normal NPC (civilian)
             if (characterType == 0)
             {
-
+                health = 50;
             }
         }
         //set initial health and water
@@ -48,8 +47,11 @@ public class Character : MonoBehaviour
         water = 100f;
 
         //set array size
-        inventorySlot = new string[16];
-        inventorySlotSize = new byte[16];
+        inventory = new InventorySlotData[16];
+
+        //set slots for inventory size
+        SetInventorySize(true, inventorySize);
+        
     }
     public void UpdateFood(bool ateFood, float amount)
     {
@@ -85,5 +87,57 @@ public class Character : MonoBehaviour
         {
             health -= amount;
         }
+    }
+    public void SetInventorySize(bool isIncreasing, sbyte newSize)
+    {
+        //if inventory is increasing
+        if (isIncreasing)
+        {
+            //create data in array for the size of the array
+            for (sbyte i = 0; i < newSize; i++)
+            {
+                //only create new slot if it's null
+                if (inventory[i] == null)
+                {
+                    //have to create the actual data in each slot (when created defaults are set)
+                    inventory[i] = new InventorySlotData();
+                }
+            }
+        }
+        //update size
+        inventorySize = newSize;
+    }
+}
+public class InventorySlotData
+{
+    protected string itemName = "";
+    protected sbyte itemAmount = 0;
+
+    public string GetItemName()
+    {
+        return itemName;
+    }
+    public sbyte GetItemAmount()
+    {
+        return itemAmount;
+    }
+    public void SetItem(string name, sbyte amount)
+    {
+        itemName = name;
+        itemAmount = amount;
+        return;
+    }
+    public void UpdateAmount(sbyte amount)
+    {
+        itemAmount += amount;
+        if(itemAmount <= 0)
+        {
+            ResetSlot();
+        }
+    }
+    private void ResetSlot()
+    {
+        itemName = "";
+        itemAmount = 0;
     }
 }

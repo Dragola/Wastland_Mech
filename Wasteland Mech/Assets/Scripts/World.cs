@@ -219,11 +219,11 @@ public class World : MonoBehaviour
         save.player.health = playerGameObject.GetComponent<Player>().GetHealth();
 
         //inventory
-        for (byte i = 0; i < 4; i++)
+        for (sbyte i = 0; i < 4; i++)
         {
             playerInventoryData data = new playerInventoryData();
-            data.slotItem = playerGameObject.GetComponent<Player>().GetinventoryItem(i);
-            data.slotAmount = playerGameObject.GetComponent<Player>().GetinventoryAmount(i);
+            data.slotItem = playerGameObject.GetComponent<Player>().GetInventoryName(i);
+            data.slotAmount = playerGameObject.GetComponent<Player>().GetInventoryAmount(i);
             save.inventory.Add(data);
         }
         //save inventory slots
@@ -320,7 +320,7 @@ class playerData //player data
 class playerInventoryData // player's inventory
 {
     public string slotItem = "";
-    public byte slotAmount = 0;
+    public sbyte slotAmount = 0;
 }
 [Serializable]
 class worldData //world data

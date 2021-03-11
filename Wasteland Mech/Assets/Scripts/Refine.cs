@@ -13,11 +13,11 @@ public class Refine : MonoBehaviour
 
     //smelting item
     public string refineItemName = "";
-    public byte refineItemNum = 0;
+    public sbyte refineItemNum = 0;
 
     //smelted item
     public string refinedItemName = "";
-    public byte refinedItemNum = 0;
+    public sbyte refinedItemNum = 0;
 
     //private byte SMELT_MAX = 50;
     public byte SMELTED_MAX = 100;
@@ -25,7 +25,7 @@ public class Refine : MonoBehaviour
     public bool updateText = false;
 
     //---------------------------------------------------------------------------------Add Function
-    public void AddRefineItem(string itemName, byte numberItems)
+    public void AddRefineItem(string itemName, sbyte numberItems)
     {
         //same item
         if (refineItemName.CompareTo(itemName) == 0)

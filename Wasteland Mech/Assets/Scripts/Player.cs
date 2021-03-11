@@ -58,9 +58,8 @@ public class Player : Character
         //set player up
         CharacterSetUp(true, 0);
 
-        //inventory button setup
+        //inventory
         inventoryButtons = new Button[16];
-        InventoryButtonLayout();
 
         //scripts
         scriptW = GameObject.Find("world").GetComponent<World>();
@@ -81,6 +80,9 @@ public class Player : Character
         playerPauseMenuUI = GameObject.Find("playerPauseMenuUI").GetComponent<Canvas>();
         playerOptionsUI = GameObject.Find("playerOptionsUI").GetComponent<Canvas>();
         avgFrameRateText = GameObject.Find("playerFPS").GetComponent<Text>();
+        
+        //create buttons
+        InventoryButtonLayout(4);
     }
     //---------------------------------------------------------------------------------Start Function
     void Start()
@@ -94,13 +96,6 @@ public class Player : Character
         playerPauseMenuUI.gameObject.SetActive(false);
         playerOptionsUI.gameObject.SetActive(false);
         playerDrop.gameObject.SetActive(false);
-
-        //fill inventorySlot with "" for default names and inventory Size with 0
-        for (byte i = 0; i < inventorySlot.Length; i++)
-        {
-            inventorySlot[i] = "";
-            inventorySlotSize[i] = 0;
-        }
 
         //set conditons
         playerFood.text = food.ToString() + "%";
@@ -363,13 +358,13 @@ public class Player : Character
                 {
                     Debug.Log("Furnaceing added scrap: " + reachableObject.name);
 
-                    byte slot = InventoryLocateItem("scrap");
+                    sbyte slot = InventoryLocateItem("scrap");
 
                     //add scrap to furnace
-                    reachableObject.GetComponentInParent<Furnace>().AddRefineItem("scrap", inventorySlotSize[slot]);
+                    reachableObject.GetComponentInParent<Furnace>().AddRefineItem("scrap", inventory[slot].GetItemAmount());
 
                     //remove scrap from inventory and update inventory
-                    inventorySlotSize[slot] = 0;
+                    inventory[slot].UpdateAmount(0);
                     InventoryUpdate();
                 }
             }
@@ -387,7 +382,7 @@ public class Player : Character
                     //only add to inventory if there is resource(s) to pull from furnace
                     if(refinedItem[0].CompareTo("") != 0)
                     {
-                        InventoryAdd(refinedItem[0], byte.Parse(refinedItem[1]));
+                        InventoryAdd(refinedItem[0], sbyte.Parse(refinedItem[1]));
                     }
                 }
                 //if shematic then set to complete
@@ -448,7 +443,7 @@ public class Player : Character
             PauseGame();
         }
         //backpack upgrade
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.U))
         {
             if (hasBackpack == false) {
                 BackpackStatus(true);
@@ -525,7 +520,7 @@ public class Player : Character
             //if the button is there
             if (inventoryButtons[i] != null)
             {
-                inventoryButtons[i].GetComponentInChildren<Text>().text = inventorySlot[i] + " x " + inventorySlotSize[i];
+                inventoryButtons[i].GetComponentInChildren<Text>().text = inventory[i].GetItemName() + " x " + inventory[i].GetItemAmount();
             }
             else
             {
@@ -535,26 +530,26 @@ public class Player : Character
         return;
     }
     //adds item to inventory
-    private void InventoryAdd(string item, byte num)
+    private void InventoryAdd(string item, sbyte num)
     {
         //first free slot incase item isn't in inventory
         sbyte firstFreeSlot = -1;
         bool slotFound = false;
 
-        for (byte i = 0; i < inventorySlot.Length; i++)
+        for (byte i = 0; i < inventorySize; i++)
         {
 
             //finds first open slot and marks
-            if (inventorySlot[i].CompareTo("") == 0 && firstFreeSlot == -1)
+            if (inventory[i].GetItemName().CompareTo("") == 0 && firstFreeSlot == -1)
             {
                 firstFreeSlot = (sbyte)i;
             }
 
             //add to existing slot
-            else if (inventorySlot[i].CompareTo(item) == 0 && (inventorySlotSize[i] + num) != 100)
+            else if (inventory[i].GetItemName().CompareTo(item) == 0 && (inventory[i].GetItemAmount() + num) != 100)
             {
                 slotFound = true;
-                inventorySlotSize[i] += num;
+                inventory[i].UpdateAmount(num);
                 InventoryUpdate();
             }
         }
@@ -562,8 +557,7 @@ public class Player : Character
         //if item isn't in inventory and inventory isn't full
         if (slotFound == false && firstFreeSlot != -1)
         {
-            inventorySlot[firstFreeSlot] = item;
-            inventorySlotSize[firstFreeSlot] += num;
+            inventory[firstFreeSlot].SetItem(item, num);
             InventoryUpdate();
         }
         return;
@@ -576,11 +570,11 @@ public class Player : Character
         //drop the item that was selected
         if (buttonName.CompareTo("playerDrop") == 0)
         {
-            if (slotSelected != -1 && inventorySlotSize[slotSelected] > 0)
+            if (slotSelected != -1 && inventory[slotSelected].GetItemAmount() > 0)
             {
-                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventorySlot[slotSelected]))), playerDropSpot.transform.position, Quaternion.identity.normalized);
-                item.name = inventorySlot[slotSelected];
-                inventorySlotSize[slotSelected]--;
+                GameObject item = Instantiate(((GameObject)(Resources.Load("Prefabs/Resources/" + inventory[slotSelected].GetItemName()))), playerDropSpot.transform.position, Quaternion.identity.normalized);
+                item.name = inventory[slotSelected].GetItemName();
+                inventory[slotSelected].UpdateAmount(-1);
                 InventoryUpdate();
             }
         }
@@ -591,10 +585,10 @@ public class Player : Character
         bool openSlot = false;
 
         //check slots
-        for (byte i = 0; i < inventorySlotSize.Length && openSlot == false; i++)
+        for (byte i = 0; i < inventorySize && openSlot == false; i++)
         {
             //if slot is that resource type and isn't full (need to later change resource damage so slot of 99 won't mine x5 since you can only store 1).
-            if (inventorySlot[i].CompareTo("") == 0 || (inventorySlot[i].CompareTo(resource) == 0 && inventorySlotSize[i] < 100))
+            if (inventory[i].GetItemName().CompareTo("") == 0 || (inventory[i].GetItemName().CompareTo(resource) == 0 && inventory[i].GetItemAmount() < 100))
             {
                 openSlot = true;
             }
@@ -602,15 +596,15 @@ public class Player : Character
         return openSlot;
     }
     //look for resource in players inventory
-    private byte InventoryLocateItem(string resource)
+    private sbyte InventoryLocateItem(string resource)
     {
         //slot
-        byte slot = 5;
+        sbyte slot = 5;
 
         //check slots
-        for (byte i = 0; i < inventorySlotSize.Length; i++)
+        for (sbyte i = 0; i < inventorySize; i++)
         {
-            if (inventorySlot[i].CompareTo(resource) == 0)
+            if (inventory[i].GetItemName().CompareTo(resource) == 0)
             {
                 slot = i;
             }
@@ -618,60 +612,70 @@ public class Player : Character
         return slot;
     }
     //creates buttons for inventory
-    public void InventoryButtonLayout()
+    public void InventoryButtonLayout(byte numButtons)
     {
         int startingX = -790;
         int startingY = -490;
         //create number of buttons for inventorySize and set their respective text's
-        for (byte i = 0; i < inventorySize; i++)
+        for (byte i = 0; i < inventoryButtons.Length; i++)
         {
-            //spawn button
-            GameObject button = Instantiate((GameObject)Resources.Load("Prefabs/Player/inventoryButton"));
-
-            //set parent
-            button.transform.SetParent(GameObject.Find("playerInventoryUI").GetComponent<Transform>(), false);
-
-            //set scale
-            button.transform.localScale = new Vector3(1, 1, 1);
-
-            //set position of first 4 buttons
-            if (i < 4)
+            if (i < numButtons && inventoryButtons[i] == null)
             {
-                //set position based on the total number of inventory slots
-                button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
+                //spawn button
+                GameObject button = Instantiate((GameObject)Resources.Load("Prefabs/Player/inventoryButton"));
+
+                //set parent
+                button.transform.SetParent(playerInventoryUI.GetComponent<Transform>(), false);
+
+                //set scale
+                button.transform.localScale = new Vector3(1, 1, 1);
+
+                //set position of first 4 buttons
+                if (i < 4)
+                {
+                    //set position based on the total number of inventory slots
+                    button.transform.localPosition = new Vector3(startingX + Math.Abs((i * 500)), startingY, 0);
+                }
+                else if (i < 8)
+                {
+                    //set position based on the total number of inventory slots
+                    button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
+                }
+                else
+                {
+                    //set position based on the total number of inventory slots
+                    button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
+                }
+
+                //this is unique to each button
+                byte buttonNumber = i;
+
+                //set button name
+                button.name = "inventoryButton" + buttonNumber;
+
+                //reference the button compenent
+                Button buttonComponent = button.GetComponentInChildren<Button>();
+
+                //add listener to button
+                buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
+
+                //set button in array
+                inventoryButtons[i] = buttonComponent;
             }
-            else if (i < 8)
+            //if at a button that's not needed
+            else if (i >= numButtons && inventoryButtons[i] != null)
             {
-                //set position based on the total number of inventory slots
-                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 100, 0);
+                Destroy(inventoryButtons[i].gameObject);
+                inventoryButtons[i] = null;
+                
             }
-            else
-            {
-                //set position based on the total number of inventory slots
-                button.transform.position = new Vector3(startingX + Math.Abs((i * 500)), startingY + 200, 0);
-            }
-
-            //this is unique to each button
-            byte buttonNumber = i;
-
-            //set button name
-            button.name = "inventoryButton" + buttonNumber;
-
-            //reference the button compenent
-            Button buttonComponent = button.GetComponentInChildren<Button>();
-
-            //add listener to button
-            buttonComponent.onClick.AddListener(() => ButtonClicked(buttonNumber));
-
-            //set button in array
-            inventoryButtons[i] = buttonComponent;
         }
+        
     }
     //set's the text for the inventory slot (should this be UI or Invenotory group?)
-    public void SetInventory(byte slot, string name, byte amount)
+    public void SetInventory(byte slot, string name, sbyte amount)
     {
-        inventorySlot[slot] = name;
-        inventorySlotSize[slot] = amount;
+        inventory[slot].SetItem(name, amount);
         return;
     }
     //used for inventory buttons when clicked
@@ -695,11 +699,15 @@ public class Player : Character
         if (pickedUp == true && hasBackpack == false)
         {
             hasBackpack = true;
+            SetInventorySize(true, 12);
+            InventoryButtonLayout(12);
         }
         //dropped backpack
         else if (pickedUp == false && hasBackpack == true)
         {
             hasBackpack = false;
+            SetInventorySize(false, 4);
+            InventoryButtonLayout(4);
         }
     }
     //---------------------------------------------------------------------------------UI Functions
@@ -976,13 +984,13 @@ public class Player : Character
     {
         this.health = health;
     }
-    public string GetinventoryItem(byte slot)
+    public string GetInventoryName(sbyte slot)
     {
-        return inventorySlot[slot];
+        return inventory[slot].GetItemName();
     }
-    public byte GetinventoryAmount(byte slot)
+    public sbyte GetInventoryAmount(sbyte slot)
     {
-        return inventorySlotSize[slot];
+        return inventory[slot].GetItemAmount();
     }
     //gets rescouce type for harvestable resource
     private string GetHarvestableResource(string name)
